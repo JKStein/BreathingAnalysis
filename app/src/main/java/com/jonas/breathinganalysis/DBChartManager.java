@@ -2,9 +2,6 @@ package com.jonas.breathinganalysis;
 
 import android.graphics.Color;
 import android.media.MediaRecorder;
-import android.os.Build;
-import android.os.Handler;
-import android.util.Log;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.YAxis;
@@ -17,21 +14,21 @@ import com.github.mikephil.charting.utils.ColorTemplate;
 import java.util.ArrayList;
 
 
-public class DBChartManager {
-    BreathingAnalysis breathingAnalysis;
+class DBChartManager {
+    private BreathingAnalysis breathingAnalysis;
 
-    LineChart dBChart;
+    private LineChart dBChart;
 
-    MediaRecorder mRecorder;
+    private MediaRecorder mRecorder;
 
     private static double mEMA = 0.0;
     static final private double EMA_FILTER = 0.6;
 
 
 
-    public DBChartManager(BreathingAnalysis breathingAnalysis, LineChart dBChart) {
-        this.dBChart = dBChart;
+    DBChartManager(BreathingAnalysis breathingAnalysis) {
         this.breathingAnalysis = breathingAnalysis;
+        this.dBChart = (LineChart) breathingAnalysis.findViewById(R.id.dBChartDisplay);
     }
 
 
@@ -51,7 +48,7 @@ public class DBChartManager {
         return set;
     }
 
-    public double getAmplitude() {
+    private double getAmplitude() {
         if (mRecorder != null)
             return  (mRecorder.getMaxAmplitude());
         else
@@ -59,14 +56,14 @@ public class DBChartManager {
 
     }
 
-    public double getAmplitudeEMA() {
+    private double getAmplitudeEMA() {
         double amp =  getAmplitude();
         mEMA = EMA_FILTER * amp + (1.0 - EMA_FILTER) * mEMA;
         return mEMA;
     }
 
-    public void initializeDBChart() {
-        float value = Float.parseFloat(Double.toString((getAmplitudeEMA())));
+    void initializeDBChart() {
+        //float value = Float.parseFloat(Double.toString((getAmplitudeEMA())));
 
         ArrayList<Entry> yAxesDB = new ArrayList<>();
         float xEntry = Float.parseFloat("0");
@@ -85,7 +82,7 @@ public class DBChartManager {
 
 
 
-    public void startRecorder(){
+    void startRecorder(){
         if (mRecorder == null)
         {
             mRecorder = new MediaRecorder();
@@ -117,7 +114,7 @@ public class DBChartManager {
 
     }
 
-    public void addDBEntry() {
+    private void addDBEntry() {
         LineData data = dBChart.getData();
 
         if (data != null) {
@@ -147,7 +144,7 @@ public class DBChartManager {
         }
     }
 
-    public void updateTv(){
+    void updateTv(){
         //System.out.println(Double.toString((getAmplitudeEMA())));
         breathingAnalysis.setCurrentDB(Float.parseFloat(Double.toString((getAmplitudeEMA()))));
         addDBEntry();

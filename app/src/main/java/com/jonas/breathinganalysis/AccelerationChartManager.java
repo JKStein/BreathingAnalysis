@@ -13,18 +13,19 @@ import com.github.mikephil.charting.utils.ColorTemplate;
 import java.util.ArrayList;
 
 
-public class AccelerationChartManager {
+class AccelerationChartManager {
 
-    BreathingAnalysis breathingAnalysis;
+    private BreathingAnalysis breathingAnalysis;
 
-    LineChart accelerationChart;
+    private LineChart accelerationChart;
 
-    public AccelerationChartManager(BreathingAnalysis breathingAnalysis, LineChart accelerationChart) {
-        this.accelerationChart = accelerationChart;
+    AccelerationChartManager(BreathingAnalysis breathingAnalysis) {
         this.breathingAnalysis = breathingAnalysis;
+        this.accelerationChart = (LineChart) breathingAnalysis.findViewById(R.id.accelerationChartDisplay);
+        initializeAccelerationChart();
     }
 
-    public void initializeAccelerationChart() {
+    private void initializeAccelerationChart() {
         ArrayList<Entry> yAxesYAcceleration = new ArrayList<>();
         float xEntry = Float.parseFloat("0");
         yAxesYAcceleration.add(new Entry(xEntry,0f));
@@ -39,7 +40,7 @@ public class AccelerationChartManager {
         accelerationChart.invalidate();
     }
 
-    public void addAccelerationEntry() {
+    void addAccelerationEntry() {
         LineData data = accelerationChart.getData();
 
         if (data != null) {
