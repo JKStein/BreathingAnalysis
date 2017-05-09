@@ -100,10 +100,10 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="220dp"
-        tools:context="applications.accelerationmonitor.customlinechart">
+        tools:context="applications.breathinganalysis.customlinechart">
 
         <com.github.mikephil.charting.charts.LineChart
-            android:id="@+id/lineChartDisplay1"
+            android:id="@+id/accelerationChartDisplay"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             ></com.github.mikephil.charting.charts.LineChart>
@@ -111,10 +111,10 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="220dp"
-        tools:context="applications.accelerationmonitor.customlinechart">
+        tools:context="applications.breathinganalysis.customlinechart">
 
         <com.github.mikephil.charting.charts.LineChart
-            android:id="@+id/lineChartDisplay2"
+            android:id="@+id/dBChartDisplay"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             ></com.github.mikephil.charting.charts.LineChart>
