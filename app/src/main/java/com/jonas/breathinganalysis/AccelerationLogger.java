@@ -1,7 +1,7 @@
 package com.jonas.breathinganalysis;
 
-public class AccelerationLogger implements Runnable {
-    AccelerationMeasurement accelerationMeasurement;
+class AccelerationLogger implements Runnable {
+    private AccelerationMeasurement accelerationMeasurement;
 
     private Thread t;
 
@@ -29,7 +29,7 @@ public class AccelerationLogger implements Runnable {
         System.out.println("Thread exiting.");
     }
 
-    public void start () {
+    void start () {
         System.out.println("Starting ");
         if (t == null) {
             t = new Thread (this);

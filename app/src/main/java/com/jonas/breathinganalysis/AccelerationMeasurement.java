@@ -18,7 +18,7 @@ class AccelerationMeasurement implements SensorEventListener {
     private float currentYF = 0;
     private float currentZF = 0;
 
-    boolean loggerActivated;
+    private boolean loggerActivated;
 
 
     private TextView currentX, currentY, currentZ;
@@ -31,7 +31,7 @@ class AccelerationMeasurement implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if(loggerActivated == false) {
+        if(!loggerActivated) {
             activateLogger();
         }
         // clean current values
@@ -96,7 +96,7 @@ class AccelerationMeasurement implements SensorEventListener {
         return currentZF;
     }
 
-    void activateLogger() {
+    private void activateLogger() {
         loggerActivated = true;
         AccelerationLogger accelerationLogger = new AccelerationLogger(this);
         accelerationLogger.start();

@@ -127,7 +127,7 @@ class DBMeasurement implements OnChartValueSelectedListener {
         return mEMA;
     }
 
-    void updateTv(){
+    private void updateTv(){
         currentDB = Float.parseFloat(Double.toString((getAmplitudeEMA())));
         breathingAnalysis.dbChartManager.addDBEntry();
     }

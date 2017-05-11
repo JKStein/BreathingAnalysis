@@ -42,7 +42,7 @@ class DBChartManager {
 
 
 
-    void initializeDBChart() {
+    private void initializeDBChart() {
         //float value = Float.parseFloat(Double.toString((getAmplitudeEMA())));
 
         ArrayList<Entry> yAxesDB = new ArrayList<>();
