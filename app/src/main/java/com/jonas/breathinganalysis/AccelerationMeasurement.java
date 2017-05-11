@@ -18,16 +18,22 @@ class AccelerationMeasurement implements SensorEventListener {
     private float currentYF = 0;
     private float currentZF = 0;
 
+    private boolean loggerActivated;
+
 
     private TextView currentX, currentY, currentZ;
 
     AccelerationMeasurement(BreathingAnalysis breathingAnalysis) {
         this.breathingAnalysis = breathingAnalysis;
         initializeViews();
+        loggerActivated = false;
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        if(!loggerActivated) {
+            activateLogger();
+        }
         // clean current values
         displayCleanValues();
 
@@ -78,8 +84,21 @@ class AccelerationMeasurement implements SensorEventListener {
         currentZ = (TextView) breathingAnalysis.findViewById(R.id.currentZ);
     }
 
+    float getCurrentXValue() {
+        return currentXF;
+    }
+
     float getCurrentYValue() {
         return currentYF;
     }
 
+    float getCurrentZValue() {
+        return currentZF;
+    }
+
+    private void activateLogger() {
+        loggerActivated = true;
+        AccelerationLogger accelerationLogger = new AccelerationLogger(this);
+        accelerationLogger.start();
+    }
 }

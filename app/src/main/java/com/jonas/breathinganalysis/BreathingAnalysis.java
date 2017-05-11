@@ -30,11 +30,14 @@ public class BreathingAnalysis extends Activity{
         accelerationChartManager = new AccelerationChartManager(this);
         dbChartManager = new DBChartManager(this);
         dbMeasurement.initializeDBMeasurement();
-        dbChartManager.startRecorder();
-        dbChartManager.initializeDBChart();
+        dbMeasurement.startRecorder();
 
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        installAccelerometer();
+    }
+
+    private void installAccelerometer() {
         if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
             // success! we have an accelerometer
             accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -51,26 +54,16 @@ public class BreathingAnalysis extends Activity{
     }
 
     //onResume() register the accelerometer for listening the events
+    @Override
     protected void onResume() {
         super.onResume();
         sensorManager.registerListener(accelerationMeasurement, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     //onPause() unregister the accelerometer for stop listening the events
+    @Override
     protected void onPause() {
         super.onPause();
         sensorManager.unregisterListener(accelerationMeasurement);
-    }
-
-    public float getCurrentYValue() {
-        return accelerationMeasurement.getCurrentYValue();
-    }
-
-    public float getCurrentDB() {
-        return dbMeasurement.getCurrentDB();
-    }
-
-    public void setCurrentDB(float newDB) {
-        dbMeasurement.setCurrentDB(newDB);
     }
 }

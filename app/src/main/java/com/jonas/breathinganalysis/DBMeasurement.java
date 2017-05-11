@@ -1,5 +1,6 @@
 package com.jonas.breathinganalysis;
 
+import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
@@ -14,13 +15,19 @@ class DBMeasurement implements OnChartValueSelectedListener {
 
     private float currentDB = 0;
 
+    private MediaRecorder mRecorder;
+
     private String [] permissions = {"android.permission.RECORD_AUDIO", "android.permission.WRITE_EXTERNAL_STORAGE"};
+
+
+    private static double mEMA = 0.0;
+    static final private double EMA_FILTER = 0.6;
 
     private Thread runner;
     private final Runnable updater = new Runnable(){
 
         public void run(){
-            breathingAnalysis.dbChartManager.updateTv();
+            updateTv();
         }
     };
     private final Handler mHandler = new Handler();
@@ -56,6 +63,7 @@ class DBMeasurement implements OnChartValueSelectedListener {
             runner.start();
             Log.d("Noise", "start runner()");
         }
+
     }
 
     @Override
@@ -72,7 +80,55 @@ class DBMeasurement implements OnChartValueSelectedListener {
         return currentDB;
     }
 
-    void setCurrentDB(float newDB) {
-        currentDB = newDB;
+
+    void startRecorder(){
+        if (mRecorder == null)
+        {
+            mRecorder = new MediaRecorder();
+            mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            mRecorder.setOutputFile("/dev/null");
+            try
+            {
+                mRecorder.prepare();
+            }catch (java.io.IOException ioe) {
+                android.util.Log.e("[Monkey]", "IOException: " +
+                        android.util.Log.getStackTraceString(ioe));
+
+            }catch (java.lang.SecurityException e) {
+                android.util.Log.e("[Monkey]", "SecurityException: " +
+                        android.util.Log.getStackTraceString(e));
+            }
+            try
+            {
+                mRecorder.start();
+            }catch (java.lang.SecurityException e) {
+                android.util.Log.e("[Monkey]", "SecurityException: " +
+                        android.util.Log.getStackTraceString(e));
+            }
+
+            //mEMA = 0.0;
+        }
+
+    }
+
+    private double getAmplitude() {
+        if (mRecorder != null)
+            return  (mRecorder.getMaxAmplitude());
+        else
+            return 0;
+
+    }
+
+    private double getAmplitudeEMA() {
+        double amp =  getAmplitude();
+        mEMA = EMA_FILTER * amp + (1.0 - EMA_FILTER) * mEMA;
+        return mEMA;
+    }
+
+    private void updateTv(){
+        currentDB = Float.parseFloat(Double.toString((getAmplitudeEMA())));
+        breathingAnalysis.dbChartManager.addDBEntry();
     }
 }

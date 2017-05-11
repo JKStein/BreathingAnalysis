@@ -1,7 +1,6 @@
 package com.jonas.breathinganalysis;
 
 import android.graphics.Color;
-import android.media.MediaRecorder;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.YAxis;
@@ -15,20 +14,13 @@ import java.util.ArrayList;
 
 
 class DBChartManager {
-    private BreathingAnalysis breathingAnalysis;
-
+    private DBMeasurement dbMeasurement;
     private LineChart dBChart;
 
-    private MediaRecorder mRecorder;
-
-    private static double mEMA = 0.0;
-    static final private double EMA_FILTER = 0.6;
-
-
-
     DBChartManager(BreathingAnalysis breathingAnalysis) {
-        this.breathingAnalysis = breathingAnalysis;
+        this.dbMeasurement = breathingAnalysis.dbMeasurement;
         this.dBChart = (LineChart) breathingAnalysis.findViewById(R.id.dBChartDisplay);
+        initializeDBChart();
     }
 
 
@@ -48,21 +40,9 @@ class DBChartManager {
         return set;
     }
 
-    private double getAmplitude() {
-        if (mRecorder != null)
-            return  (mRecorder.getMaxAmplitude());
-        else
-            return 0;
 
-    }
 
-    private double getAmplitudeEMA() {
-        double amp =  getAmplitude();
-        mEMA = EMA_FILTER * amp + (1.0 - EMA_FILTER) * mEMA;
-        return mEMA;
-    }
-
-    void initializeDBChart() {
+    private void initializeDBChart() {
         //float value = Float.parseFloat(Double.toString((getAmplitudeEMA())));
 
         ArrayList<Entry> yAxesDB = new ArrayList<>();
@@ -71,50 +51,16 @@ class DBChartManager {
 
         ArrayList<ILineDataSet> lineDataSets = new ArrayList<>();
 
-        LineDataSet lineDataSet1 = new LineDataSet(yAxesDB,"y-Axes-dB");
-        lineDataSet1.setDrawCircles(false);
-        lineDataSet1.setColor(Color.BLUE);
-        lineDataSets.add(lineDataSet1);
+        LineDataSet lineDataSet = new LineDataSet(yAxesDB,"y-Axes-dB");
+        lineDataSet.setDrawCircles(false);
+        lineDataSet.setColor(Color.BLUE);
+        lineDataSets.add(lineDataSet);
         dBChart.setData(new LineData(lineDataSets));
         dBChart.setVisibleXRangeMaximum(65f);
         dBChart.invalidate();
     }
 
-
-
-    void startRecorder(){
-        if (mRecorder == null)
-        {
-            mRecorder = new MediaRecorder();
-            mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            mRecorder.setOutputFile("/dev/null");
-            try
-            {
-                mRecorder.prepare();
-            }catch (java.io.IOException ioe) {
-                android.util.Log.e("[Monkey]", "IOException: " +
-                        android.util.Log.getStackTraceString(ioe));
-
-            }catch (java.lang.SecurityException e) {
-                android.util.Log.e("[Monkey]", "SecurityException: " +
-                        android.util.Log.getStackTraceString(e));
-            }
-            try
-            {
-                mRecorder.start();
-            }catch (java.lang.SecurityException e) {
-                android.util.Log.e("[Monkey]", "SecurityException: " +
-                        android.util.Log.getStackTraceString(e));
-            }
-
-            //mEMA = 0.0;
-        }
-
-    }
-
-    private void addDBEntry() {
+    void addDBEntry() {
         LineData data = dBChart.getData();
 
         if (data != null) {
@@ -125,7 +71,7 @@ class DBChartManager {
                 data.addDataSet(set);
             }
 
-            data.addEntry(new Entry(set.getEntryCount(), breathingAnalysis.getCurrentDB()), 0);
+            data.addEntry(new Entry(set.getEntryCount(), dbMeasurement.getCurrentDB()), 0);
             data.notifyDataChanged();
 
             // let the chart know it's data has changed
@@ -142,11 +88,5 @@ class DBChartManager {
             // mChart.moveViewTo(data.getXValCount()-7, 55f,
             // AxisDependency.LEFT);
         }
-    }
-
-    void updateTv(){
-        //System.out.println(Double.toString((getAmplitudeEMA())));
-        breathingAnalysis.setCurrentDB(Float.parseFloat(Double.toString((getAmplitudeEMA()))));
-        addDBEntry();
     }
 }
