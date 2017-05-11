@@ -21,7 +21,7 @@ class AccelerationLogger implements Runnable {
                         ": x = " + accelerationMeasurement.getCurrentXValue() +
                         " | y = " + accelerationMeasurement.getCurrentYValue() +
                         " | z = " + accelerationMeasurement.getCurrentZValue());
-                Thread.sleep(10);
+                Thread.sleep(1);
             }
         }catch (InterruptedException e) {
             System.out.println("Thread interrupted.");

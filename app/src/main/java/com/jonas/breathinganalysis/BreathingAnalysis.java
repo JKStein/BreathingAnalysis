@@ -9,39 +9,36 @@ import android.hardware.SensorManager;
 import android.support.annotation.NonNull;
 
 public class BreathingAnalysis extends Activity{
-    AccelerationChartManager accelerationChartManager;
     AccelerationMeasurement accelerationMeasurement;
+    AccelerationChartManager accelerationChartManager;
 
+    DBMeasurement dbMeasurement;
     DBChartManager dbChartManager;
 
     private SensorManager sensorManager;
     private Sensor accelerometer;
 
-    DBMeasurement dbMeasurement;
-
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        dbMeasurement = new DBMeasurement(this);
         accelerationMeasurement = new AccelerationMeasurement(this);
         accelerationChartManager = new AccelerationChartManager(this);
-        dbChartManager = new DBChartManager(this);
-        dbMeasurement.initializeDBMeasurement();
-        dbMeasurement.startRecorder();
-
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         installAccelerometer();
+
+        dbMeasurement = new DBMeasurement(this);
+        dbChartManager = new DBChartManager(this);
+        dbMeasurement.initializeDBMeasurement();
+        dbMeasurement.startRecorder();
     }
 
     private void installAccelerometer() {
         if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
             // success! we have an accelerometer
             accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            sensorManager.registerListener(accelerationMeasurement, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            sensorManager.registerListener(accelerationMeasurement, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
         }
         else {
             System.out.println("No Accelerometer available!");

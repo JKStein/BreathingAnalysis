@@ -5,14 +5,11 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 
 class AccelerationMeasurement implements SensorEventListener {
-
     private BreathingAnalysis breathingAnalysis;
-
-    private float lastX = 0;
-    private float lastY = 0;
-    private float lastZ = 0;
 
     private float currentXF = 0;
     private float currentYF = 0;
@@ -20,13 +17,13 @@ class AccelerationMeasurement implements SensorEventListener {
 
     private boolean loggerActivated;
 
-
     private TextView currentX, currentY, currentZ;
 
     AccelerationMeasurement(BreathingAnalysis breathingAnalysis) {
         this.breathingAnalysis = breathingAnalysis;
         initializeViews();
         loggerActivated = false;
+        displayCleanValues();
     }
 
     @Override
@@ -34,27 +31,11 @@ class AccelerationMeasurement implements SensorEventListener {
         if(!loggerActivated) {
             activateLogger();
         }
-        // clean current values
-        displayCleanValues();
 
         // get the change of the x,y,z values of the accelerometer
         currentXF = event.values[0];
         currentYF = event.values[1];
         currentZF = event.values[2];
-
-        // if the change is below 2, it is just plain noise
-        if (Math.abs(lastX - currentXF) < 0.01)
-            currentXF = lastX;
-        if (Math.abs(lastY - currentYF) < 0.01) {
-            currentYF = lastY;
-            //y.add(currentYF);
-        }
-        if (Math.abs(lastZ - currentZF) < 0.01)
-            currentZF = lastZ;
-
-        lastX = event.values[0];
-        lastY = event.values[1];
-        lastZ = event.values[2];
 
         displayCurrentValues();
         breathingAnalysis.accelerationChartManager.addAccelerationEntry();
@@ -71,11 +52,11 @@ class AccelerationMeasurement implements SensorEventListener {
         currentZ.setText("0.0");
     }
 
-    // display the current x,y,z accelerometer values
     private void displayCurrentValues() {
-        currentX.setText(Float.toString(currentXF));
-        currentY.setText(Float.toString(currentYF));
-        currentZ.setText(Float.toString(currentZF));
+        //Float.toString would give warning, because the separator (dot or comma) is unknown
+        currentX.setText(String.format(Locale.US, "%f", currentXF));
+        currentY.setText(String.format(Locale.US, "%f", currentYF));
+        currentZ.setText(String.format(Locale.US, "%f", currentZF));
     }
 
     private void initializeViews() {

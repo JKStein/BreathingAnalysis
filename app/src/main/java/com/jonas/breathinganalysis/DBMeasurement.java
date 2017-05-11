@@ -5,21 +5,13 @@ import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.highlight.Highlight;
-import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
-
-class DBMeasurement implements OnChartValueSelectedListener {
+class DBMeasurement {
 
     private BreathingAnalysis breathingAnalysis;
-
-    private float currentDB = 0;
-
     private MediaRecorder mRecorder;
 
+    private float currentDB = 0;
     private String [] permissions = {"android.permission.RECORD_AUDIO", "android.permission.WRITE_EXTERNAL_STORAGE"};
-
-
     private static double mEMA = 0.0;
     static final private double EMA_FILTER = 0.6;
 
@@ -66,20 +58,9 @@ class DBMeasurement implements OnChartValueSelectedListener {
 
     }
 
-    @Override
-    public void onValueSelected(Entry e, Highlight h) {
-        Log.i("Entry selected", e.toString());
-    }
-
-    @Override
-    public void onNothingSelected() {
-        Log.i("Nothing selected", "Nothing selected.");
-    }
-
     float getCurrentDB() {
         return currentDB;
     }
-
 
     void startRecorder(){
         if (mRecorder == null)
