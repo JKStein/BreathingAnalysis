@@ -40,6 +40,7 @@ class AccelerationChartManager {
         accelerationChart.invalidate();
     }
 
+
     void addAccelerationEntry() {
         LineData data = accelerationChart.getData();
 
@@ -51,7 +52,7 @@ class AccelerationChartManager {
                 data.addDataSet(set);
             }
 
-            data.addEntry(new Entry(set.getEntryCount(), breathingAnalysis.getCurrentYValue()), 0);
+            data.addEntry(new Entry(set.getEntryCount(), breathingAnalysis.accelerationMeasurement.getCurrentYValue()), 0);
             data.notifyDataChanged();
 
             // let the chart know it's data has changed
