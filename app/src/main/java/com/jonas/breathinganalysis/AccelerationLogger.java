@@ -16,11 +16,11 @@ class AccelerationLogger implements Runnable {
         try
         {
             for(int i = 0; i < 100000; i++) {
-                System.out.println("i = " + i);
+                /*System.out.println("i = " + i);
                 System.out.println(System.currentTimeMillis() - startTime +
                         ": x = " + accelerationMeasurement.getCurrentXValue() +
                         " | y = " + accelerationMeasurement.getCurrentYValue() +
-                        " | z = " + accelerationMeasurement.getCurrentZValue());
+                        " | z = " + accelerationMeasurement.getCurrentZValue());*/
                 Thread.sleep(1);
             }
         }catch (InterruptedException e) {

@@ -20,6 +20,9 @@ public class BreathingAnalysis extends Activity{
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        //Testing of the interpolation tool:
+        //DataPreprocessor dataPreprocessor = new DataPreprocessor();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         accelerationMeasurement = new AccelerationMeasurement(this);
@@ -28,10 +31,13 @@ public class BreathingAnalysis extends Activity{
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         installAccelerometer();
 
-        dbMeasurement = new DBMeasurement(this);
-        dbChartManager = new DBChartManager(this);
-        dbMeasurement.initializeDBMeasurement();
-        dbMeasurement.startRecorder();
+        //dbMeasurement = new DBMeasurement(this);
+        //dbChartManager = new DBChartManager(this);
+        //dbMeasurement.initializeDBMeasurement();
+        //dbMeasurement.startRecorder();
+
+        //audio processing
+        new AudioProcessor(this);
     }
 
     private void installAccelerometer() {
