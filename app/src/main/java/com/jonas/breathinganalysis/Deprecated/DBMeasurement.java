@@ -1,11 +1,13 @@
-package com.jonas.breathinganalysis;
+package com.jonas.breathinganalysis.Deprecated;
 
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 
-class DBMeasurement {
+import com.jonas.breathinganalysis.BreathingAnalysis;
+
+public class DBMeasurement {
 
     private BreathingAnalysis breathingAnalysis;
     private MediaRecorder mRecorder;
@@ -110,6 +112,6 @@ class DBMeasurement {
 
     private void updateTv(){
         currentDB = Float.parseFloat(Double.toString((getAmplitudeEMA())));
-        breathingAnalysis.dbChartManager.addDBEntry();
+        //breathingAnalysis.dbChartManager.addDBEntry();
     }
 }

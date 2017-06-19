@@ -3,7 +3,7 @@ package com.jonas.breathinganalysis;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
-public class DataPreprocessor {
+class DataPreprocessor {
 
     DataPreprocessor() {
         testInterpolation();

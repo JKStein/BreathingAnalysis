@@ -1,6 +1,8 @@
 package com.jonas.breathinganalysis;
 
-import android.widget.Toast;
+import android.widget.TextView;
+
+import java.util.Locale;
 
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
@@ -10,25 +12,17 @@ import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 
-
-/**
- * Created by Jonas on 13.06.2017.
- */
-
-public class AudioProcessor {
-
-    public static BreathingAnalysis breathingAnalysis;
+class AudioProcessor {
+    private TextView pitch, sp, probability;
+    private double currentSP;
 
     AudioProcessor(final BreathingAnalysis breathingAnalysis) {
-        this.breathingAnalysis = breathingAnalysis;
-        Toast.makeText(breathingAnalysis,
-                "started", Toast.LENGTH_LONG).show();
-        start();
+        initializeViews(breathingAnalysis);
+        startListening(breathingAnalysis);
     }
 
-    void start() {
+    private void startListening(final BreathingAnalysis breathingAnalysis) {
         AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050,1024,0);
-
 
         dispatcher.addAudioProcessor(new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, 22050, 1024, new PitchDetectionHandler() {
 
@@ -36,10 +30,14 @@ public class AudioProcessor {
             public void handlePitch(PitchDetectionResult pitchDetectionResult,
                                     AudioEvent audioEvent) {
                 final float pitchInHz = pitchDetectionResult.getPitch();
-                AudioProcessor.breathingAnalysis.runOnUiThread(new Runnable() {
+                final float probability = pitchDetectionResult.getProbability();
+                breathingAnalysis.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        System.out.println("pitch: " + pitchInHz);
+                        displayCurrentPitch(pitchInHz);
+                        displayCurrentProbability(probability);
+                        displayCurrentSP();
+                        breathingAnalysis.soundList.add(new Sound(System.currentTimeMillis(), pitchInHz, probability, currentSP));
                     }
                 });
 
@@ -47,10 +45,31 @@ public class AudioProcessor {
         }));
         new Thread(dispatcher,"Audio Dispatcher").start();
 
-        SilenceDetector silenceDetector = new SilenceDetector(SilenceDetector.DEFAULT_SILENCE_THRESHOLD,false);
+        SilenceDetector silenceDetector = new SilenceDetector(SoundDetector.THRESHOLD,false);
         dispatcher.addAudioProcessor(silenceDetector);
-        dispatcher.addAudioProcessor(new SoundDetector(silenceDetector));
-
+        dispatcher.addAudioProcessor(new SoundDetector(silenceDetector, this));
         System.out.println("Audio Dispatcher started");
+    }
+
+    private void displayCurrentPitch(float pitch) {
+        this.pitch.setText(String.format(Locale.US, "%f", pitch));
+    }
+
+    private void displayCurrentSP() {
+        this.sp.setText(String.format(Locale.US, "%f", currentSP));
+    }
+
+    private void displayCurrentProbability(float probability) {
+        this.probability.setText(String.format(Locale.US, "%f", probability));
+    }
+
+    private void initializeViews(BreathingAnalysis breathingAnalysis) {
+        pitch = (TextView) breathingAnalysis.findViewById(R.id.currentPitch);
+        probability = (TextView) breathingAnalysis.findViewById(R.id.currentProbability);
+        sp = (TextView) breathingAnalysis.findViewById(R.id.currentSoundPressure);
+    }
+
+    void setCurrentSP(double currentSP) {
+        this.currentSP = currentSP;
     }
 }

@@ -1,123 +1,518 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_gravity="center"
-    android:background="#ffffff"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:paddingTop="20dp"
-    android:weightSum="1">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="74dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
         android:background="#ffffff"
-        android:gravity="center|top"
-        android:orientation="horizontal"
-        android:layout_weight="0.05">
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingTop="20dp"
+        android:weightSum="1">
 
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.33"
-            android:background="#ffffff"
-            android:gravity="center"
-            android:orientation="vertical">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="10dp"
-                android:text="X-Axis"
-                android:textSize="15dp"/>
+                android:layout_weight="0.33"
+                android:background="#ffffff"
+                android:gravity="center"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/currentX"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="10dp"
-                android:text="0.0"
-                android:textSize="15dp"/>
+                <Button
+                    android:id="@+id/button_send"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Start"/>
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.33"
-            android:background="#ffffff"
-            android:gravity="center"
-            android:orientation="vertical">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="10dp"
-                android:text="Y-Axis"
-                android:textSize="15dp"/>
+                android:layout_weight="0.33"
+                android:background="#ffffff"
+                android:gravity="center"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/currentY"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="10dp"
-                android:text="0.0"
-                android:textSize="15dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="Accelerometer:"
+                    android:textSize="15dp"/>
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.33"
+            android:layout_width="match_parent"
+            android:layout_height="74dp"
             android:background="#ffffff"
-            android:gravity="center"
-            android:orientation="vertical">
+            android:gravity="center|top"
+            android:orientation="horizontal"
+            android:layout_weight="0.05">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="10dp"
-                android:text="Z-Axis"
-                android:textSize="15dp"/>
+                android:layout_weight="0.33"
+                android:background="#ffffff"
+                android:gravity="center"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/currentZ"
-                android:layout_width="wrap_content"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="X-Axis"
+                    android:textSize="15dp"/>
+
+                <TextView
+                    android:id="@+id/currentX"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="0.0"
+                    android:textSize="15dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="10dp"
-                android:text="0.0"
-                android:textSize="15dp"/>
+                android:layout_weight="0.33"
+                android:background="#ffffff"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="Y-Axis"
+                    android:textSize="15dp"/>
+
+                <TextView
+                    android:id="@+id/currentY"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="0.0"
+                    android:textSize="15dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.33"
+                android:background="#ffffff"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="Z-Axis"
+                    android:textSize="15dp"/>
+
+                <TextView
+                    android:id="@+id/currentZ"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="0.0"
+                    android:textSize="15dp"/>
+            </LinearLayout>
         </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.33"
+                android:background="#ffffff"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="Gyroscope:"
+                    android:textSize="15dp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="74dp"
+            android:background="#ffffff"
+            android:gravity="center|top"
+            android:orientation="horizontal"
+            android:layout_weight="0.05">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.33"
+                android:background="#ffffff"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="X-Axis"
+                    android:textSize="15dp"/>
+
+                <TextView
+                    android:id="@+id/currentXG"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="0.0"
+                    android:textSize="15dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.33"
+                android:background="#ffffff"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="Y-Axis"
+                    android:textSize="15dp"/>
+
+                <TextView
+                    android:id="@+id/currentYG"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="0.0"
+                    android:textSize="15dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.33"
+                android:background="#ffffff"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="Z-Axis"
+                    android:textSize="15dp"/>
+
+                <TextView
+                    android:id="@+id/currentZG"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="0.0"
+                    android:textSize="15dp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.33"
+                android:background="#ffffff"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="Magnetometer:"
+                    android:textSize="15dp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="74dp"
+            android:background="#ffffff"
+            android:gravity="center|top"
+            android:orientation="horizontal"
+            android:layout_weight="0.05">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.33"
+                android:background="#ffffff"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="X-Axis"
+                    android:textSize="15dp"/>
+
+                <TextView
+                    android:id="@+id/currentXM"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="0.0"
+                    android:textSize="15dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.33"
+                android:background="#ffffff"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="Y-Axis"
+                    android:textSize="15dp"/>
+
+                <TextView
+                    android:id="@+id/currentYM"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="0.0"
+                    android:textSize="15dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.33"
+                android:background="#ffffff"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="Z-Axis"
+                    android:textSize="15dp"/>
+
+                <TextView
+                    android:id="@+id/currentZM"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="0.0"
+                    android:textSize="15dp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.33"
+                android:background="#ffffff"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="Frequency in Herz:"
+                    android:textSize="15dp"/>
+            </LinearLayout>
+
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.33"
+                android:background="#ffffff"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/currentPitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="0.0"
+                    android:textSize="15dp"/>
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.33"
+                android:background="#ffffff"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="Probability of frequency correctness:"
+                    android:textSize="15dp"/>
+            </LinearLayout>
+
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.33"
+                android:background="#ffffff"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/currentProbability"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="0.0"
+                    android:textSize="15dp"/>
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.33"
+                android:background="#ffffff"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="Volume in dB:"
+                    android:textSize="15dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.33"
+                android:background="#ffffff"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/currentSoundPressure"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:text="0.0"
+                    android:textSize="15dp"/>
+
+            </LinearLayout>
+        </LinearLayout>
+        <!--
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="220dp"
+                        tools:context="applications.breathinganalysis.customlinechart">
+
+                        <com.github.mikephil.charting.charts.LineChart
+                            android:id="@+id/accelerationChartDisplay"
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            ></com.github.mikephil.charting.charts.LineChart>
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        tools:context="applications.breathinganalysis.customlinechart">
+
+                        <com.github.mikephil.charting.charts.LineChart
+                            android:id="@+id/dBChartDisplay"
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"></com.github.mikephil.charting.charts.LineChart>
+
+                    </RelativeLayout>
+        -->
     </LinearLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="220dp"
-        tools:context="applications.breathinganalysis.customlinechart">
-
-        <com.github.mikephil.charting.charts.LineChart
-            android:id="@+id/accelerationChartDisplay"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            ></com.github.mikephil.charting.charts.LineChart>
-    </RelativeLayout>
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="220dp"
-        tools:context="applications.breathinganalysis.customlinechart">
-
-        <com.github.mikephil.charting.charts.LineChart
-            android:id="@+id/dBChartDisplay"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            ></com.github.mikephil.charting.charts.LineChart>
-    </RelativeLayout>
-
-</LinearLayout>
+</ScrollView>

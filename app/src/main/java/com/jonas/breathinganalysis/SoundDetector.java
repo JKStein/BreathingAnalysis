@@ -4,16 +4,15 @@ import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.AudioProcessor;
 import be.tarsos.dsp.SilenceDetector;
 
-public class SoundDetector implements AudioProcessor {
+class SoundDetector implements AudioProcessor {
+    static final double THRESHOLD = -80.0D;
+    private SilenceDetector silenceDetector;
+    private com.jonas.breathinganalysis.AudioProcessor audioProcessor;
 
-    double threshold;
-    SilenceDetector silenceDetector;
 
-
-    public SoundDetector(SilenceDetector silenceDetector) {
-        this.threshold = SilenceDetector.DEFAULT_SILENCE_THRESHOLD;
+    SoundDetector(SilenceDetector silenceDetector, com.jonas.breathinganalysis.AudioProcessor audioProcessor) {
+        this.audioProcessor = audioProcessor;
         this.silenceDetector = silenceDetector;
-        silenceDetector = new SilenceDetector(threshold,false);
     }
 
     @Override
@@ -23,8 +22,11 @@ public class SoundDetector implements AudioProcessor {
     }
 
     private void handleSound(){
-        if(silenceDetector.currentSPL() > threshold){
-            System.out.println("Sound detected at:" + System.currentTimeMillis() + ", " + (int)(silenceDetector.currentSPL()) + "dB SPL\n");
+        if(silenceDetector.currentSPL() > THRESHOLD){
+            audioProcessor.setCurrentSP(silenceDetector.currentSPL());
+        }
+        else {
+            audioProcessor.setCurrentSP(THRESHOLD);
         }
     }
     @Override

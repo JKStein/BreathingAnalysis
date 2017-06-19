@@ -1,7 +1,13 @@
-package com.jonas.breathinganalysis;
+package com.jonas.breathinganalysis.Deprecated;
+
+//import com.jonas.breathinganalysis.AccelerationMeasurement;
+
 
 class AccelerationLogger implements Runnable {
-    private AccelerationMeasurement accelerationMeasurement;
+    public void run() {
+
+    }
+    /*private AccelerationMeasurement accelerationMeasurement;
 
     private Thread t;
 
@@ -20,7 +26,7 @@ class AccelerationLogger implements Runnable {
                 System.out.println(System.currentTimeMillis() - startTime +
                         ": x = " + accelerationMeasurement.getCurrentXValue() +
                         " | y = " + accelerationMeasurement.getCurrentYValue() +
-                        " | z = " + accelerationMeasurement.getCurrentZValue());*/
+                        " | z = " + accelerationMeasurement.getCurrentZValue());*//*
                 Thread.sleep(1);
             }
         }catch (InterruptedException e) {
@@ -35,5 +41,5 @@ class AccelerationLogger implements Runnable {
             t = new Thread (this);
             t.start ();
         }
-    }
+    }*/
 }

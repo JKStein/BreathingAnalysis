@@ -1,4 +1,4 @@
-package com.jonas.breathinganalysis;
+package com.jonas.breathinganalysis.Deprecated;
 
 import android.graphics.Color;
 
@@ -9,6 +9,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.jonas.breathinganalysis.BreathingAnalysis;
 
 import java.util.ArrayList;
 
@@ -21,7 +22,7 @@ class AccelerationChartManager {
 
     AccelerationChartManager(BreathingAnalysis breathingAnalysis) {
         this.breathingAnalysis = breathingAnalysis;
-        this.accelerationChart = (LineChart) breathingAnalysis.findViewById(R.id.accelerationChartDisplay);
+        //this.accelerationChart = (LineChart) breathingAnalysis.findViewById(R.id.accelerationChartDisplay);
         initializeAccelerationChart();
     }
 
@@ -41,7 +42,7 @@ class AccelerationChartManager {
     }
 
 
-    void addAccelerationEntry() {
+    void addAccelerationEntry(float value) {
         LineData data = accelerationChart.getData();
 
         if (data != null) {
@@ -52,7 +53,7 @@ class AccelerationChartManager {
                 data.addDataSet(set);
             }
 
-            data.addEntry(new Entry(set.getEntryCount(), breathingAnalysis.accelerationMeasurement.getCurrentYValue()), 0);
+            data.addEntry(new Entry(set.getEntryCount(), value), 0);
             data.notifyDataChanged();
 
             // let the chart know it's data has changed

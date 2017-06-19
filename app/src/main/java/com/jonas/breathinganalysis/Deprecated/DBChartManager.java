@@ -1,6 +1,6 @@
-package com.jonas.breathinganalysis;
+package com.jonas.breathinganalysis.Deprecated;
 
-import android.graphics.Color;
+/*import android.graphics.Color;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.YAxis;
@@ -9,22 +9,23 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.jonas.breathinganalysis.BreathingAnalysis;
 
-import java.util.ArrayList;
+import java.util.ArrayList;*/
 
 
-class DBChartManager {
-    private DBMeasurement dbMeasurement;
-    private LineChart dBChart;
+public class DBChartManager {
+    //private DBMeasurement dbMeasurement;
+    //private LineChart dBChart;
 
-    DBChartManager(BreathingAnalysis breathingAnalysis) {
-        this.dbMeasurement = breathingAnalysis.dbMeasurement;
-        this.dBChart = (LineChart) breathingAnalysis.findViewById(R.id.dBChartDisplay);
-        initializeDBChart();
+    DBChartManager(){//BreathingAnalysis breathingAnalysis) {
+        //this.dbMeasurement = breathingAnalysis.dbMeasurement;
+        //this.dBChart = (LineChart) breathingAnalysis.findViewById(R.id.dBChartDisplay);
+        //initializeDBChart();
     }
 
 
-    private LineDataSet createSet() {
+    /*private LineDataSet createSet() {
         LineDataSet set = new LineDataSet(null, "Dynamic Data");
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
         set.setColor(ColorTemplate.getHoloBlue());
@@ -38,11 +39,11 @@ class DBChartManager {
         set.setValueTextSize(9f);
         set.setDrawValues(false);
         return set;
-    }
+    }*/
 
 
 
-    private void initializeDBChart() {
+    /*private void initializeDBChart() {
         //float value = Float.parseFloat(Double.toString((getAmplitudeEMA())));
 
         ArrayList<Entry> yAxesDB = new ArrayList<>();
@@ -58,9 +59,9 @@ class DBChartManager {
         dBChart.setData(new LineData(lineDataSets));
         dBChart.setVisibleXRangeMaximum(65f);
         dBChart.invalidate();
-    }
+    }*/
 
-    void addDBEntry() {
+    /*void addDBEntry() {
         LineData data = dBChart.getData();
 
         if (data != null) {
@@ -71,7 +72,7 @@ class DBChartManager {
                 data.addDataSet(set);
             }
 
-            data.addEntry(new Entry(set.getEntryCount(), dbMeasurement.getCurrentDB()), 0);
+            //data.addEntry(new Entry(set.getEntryCount(), dbMeasurement.getCurrentDB()), 0);
             data.notifyDataChanged();
 
             // let the chart know it's data has changed
@@ -88,5 +89,5 @@ class DBChartManager {
             // mChart.moveViewTo(data.getXValCount()-7, 55f,
             // AxisDependency.LEFT);
         }
-    }
+    }*/
 }

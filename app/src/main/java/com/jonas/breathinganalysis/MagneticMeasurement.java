@@ -7,12 +7,12 @@ import android.widget.TextView;
 
 import java.util.Locale;
 
+class MagneticMeasurement implements SensorEventListener  {
 
-class AccelerationMeasurement implements SensorEventListener {
     private BreathingAnalysis breathingAnalysis;
     private TextView currentX, currentY, currentZ;
 
-    AccelerationMeasurement(BreathingAnalysis breathingAnalysis) {
+    MagneticMeasurement(BreathingAnalysis breathingAnalysis) {
         this.breathingAnalysis = breathingAnalysis;
         initializeViews();
     }
@@ -27,7 +27,7 @@ class AccelerationMeasurement implements SensorEventListener {
         currentZ.setText(String.format(Locale.US, "%f", event.values[2]));
 
         //Add new values to series of measurement
-        breathingAnalysis.accelerationList.add(new Acceleration(System.currentTimeMillis(), event.values[0], event.values[1], event.values[2]));
+        breathingAnalysis.magneticList.add(new Magnet(System.currentTimeMillis(), event.values[0], event.values[1], event.values[2]));
     }
 
     @Override
@@ -36,8 +36,9 @@ class AccelerationMeasurement implements SensorEventListener {
     }
 
     private void initializeViews() {
-        currentX = (TextView) breathingAnalysis.findViewById(R.id.currentX);
-        currentY = (TextView) breathingAnalysis.findViewById(R.id.currentY);
-        currentZ = (TextView) breathingAnalysis.findViewById(R.id.currentZ);
+        currentX = (TextView) breathingAnalysis.findViewById(R.id.currentXM);
+        currentY = (TextView) breathingAnalysis.findViewById(R.id.currentYM);
+        currentZ = (TextView) breathingAnalysis.findViewById(R.id.currentZM);
     }
 }
+
