@@ -1,15 +1,13 @@
 package com.jonas.breathinganalysis;
 
 /**
- * Created by Jonas on 19.06.2017.
+ * The result of a measurement taken by a sensor at a point in time
  */
-
-public class Rotation {
-
+class SensorDate {
     private long timestamp;
     private float xValue, yValue, zValue;
 
-    Rotation(long timestamp, float x, float y, float z) {
+    SensorDate(long timestamp, float x, float y, float z) {
         this.timestamp = timestamp;
         this.xValue = x;
         this.yValue = y;
@@ -20,19 +18,23 @@ public class Rotation {
         return timestamp;
     }
 
-    float getxValue() {
+    float getXValue() {
         return xValue;
     }
 
-    float getyValue() {
+    float getYValue() {
         return yValue;
     }
 
-    float getzValue() {
+    float getZValue() {
         return zValue;
     }
 
     public String toString() {
         return "timestamp: " + timestamp + "  ||  x: " + xValue + " | y: " + yValue + " | z: " + zValue;
+    }
+
+    void print() {
+        System.out.println(toString());
     }
 }

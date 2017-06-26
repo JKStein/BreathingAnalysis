@@ -7,11 +7,11 @@ import be.tarsos.dsp.SilenceDetector;
 class SoundDetector implements AudioProcessor {
     static final double THRESHOLD = -80.0D;
     private SilenceDetector silenceDetector;
-    private com.jonas.breathinganalysis.AudioProcessor audioProcessor;
+    private AudioHandler audioProcessor;
 
 
-    SoundDetector(SilenceDetector silenceDetector, com.jonas.breathinganalysis.AudioProcessor audioProcessor) {
-        this.audioProcessor = audioProcessor;
+    SoundDetector(SilenceDetector silenceDetector, AudioHandler audioHandler) {
+        this.audioProcessor = audioHandler;
         this.silenceDetector = silenceDetector;
     }
 

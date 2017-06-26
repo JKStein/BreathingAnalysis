@@ -12,11 +12,11 @@ import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 
-class AudioProcessor {
+class AudioHandler {
     private TextView pitch, sp, probability;
     private double currentSP;
 
-    AudioProcessor(final BreathingAnalysis breathingAnalysis) {
+    AudioHandler(final BreathingAnalysis breathingAnalysis) {
         initializeViews(breathingAnalysis);
         startListening(breathingAnalysis);
     }
@@ -34,9 +34,7 @@ class AudioProcessor {
                 breathingAnalysis.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        displayCurrentPitch(pitchInHz);
-                        displayCurrentProbability(probability);
-                        displayCurrentSP();
+                        displayCurrentValues(pitchInHz, probability);
                         breathingAnalysis.soundList.add(new Sound(System.currentTimeMillis(), pitchInHz, probability, currentSP));
                     }
                 });
@@ -50,17 +48,10 @@ class AudioProcessor {
         dispatcher.addAudioProcessor(new SoundDetector(silenceDetector, this));
         System.out.println("Audio Dispatcher started");
     }
-
-    private void displayCurrentPitch(float pitch) {
+    private void displayCurrentValues(float pitch, float probability) {
         this.pitch.setText(String.format(Locale.US, "%f", pitch));
-    }
-
-    private void displayCurrentSP() {
-        this.sp.setText(String.format(Locale.US, "%f", currentSP));
-    }
-
-    private void displayCurrentProbability(float probability) {
         this.probability.setText(String.format(Locale.US, "%f", probability));
+        this.sp.setText(String.format(Locale.US, "%f", currentSP));
     }
 
     private void initializeViews(BreathingAnalysis breathingAnalysis) {

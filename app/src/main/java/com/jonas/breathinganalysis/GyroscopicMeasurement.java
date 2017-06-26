@@ -28,7 +28,7 @@ class GyroscopicMeasurement implements SensorEventListener{
         currentZ.setText(String.format(Locale.US, "%f", event.values[2]));
 
         //Add new values to series of measurement
-        breathingAnalysis.rotationList.add(new Rotation(System.currentTimeMillis(), event.values[0], event.values[1], event.values[2]));
+        breathingAnalysis.rotationList.add(new SensorDate(System.currentTimeMillis(), event.values[0], event.values[1], event.values[2]));
     }
 
     @Override

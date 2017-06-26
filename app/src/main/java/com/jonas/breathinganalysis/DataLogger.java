@@ -10,18 +10,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class ActivityLogger {
+class DataLogger {
 
-    ActivityLogger(ArrayList<SensorData> dataCollection) {
+    DataLogger(MeasuredData measuredData) {
 
     }
 
-    static boolean isExternalStorageWritable() {
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
+    private static boolean isExternalStorageWritable() {
+        return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
     }
 
     static void log(String key, long timestamp, float value) throws IOException {

@@ -19,9 +19,9 @@ import static java.lang.System.*;
 
 public class BreathingAnalysis extends Activity{
 
-    ArrayList<Acceleration> accelerationList;
-    ArrayList<Rotation> rotationList;
-    ArrayList<Magnet> magneticList;
+    ArrayList<SensorDate> accelerationList;
+    ArrayList<SensorDate> rotationList;
+    ArrayList<SensorDate> magneticList;
     ArrayList<Sound> soundList;
 
     AccelerationMeasurement accelerationMeasurement;
@@ -39,12 +39,8 @@ public class BreathingAnalysis extends Activity{
 
     Button button;
 
-    private long startTime;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        startTime = -1;
-
         //Testing of the interpolation tool:
         //DataPreprocessor dataPreprocessor = new DataPreprocessor();
 
@@ -71,7 +67,7 @@ public class BreathingAnalysis extends Activity{
         //dbMeasurement.startRecorder();
 
         //audio processing
-        new AudioProcessor(this);
+        new AudioHandler(this);
 
         installButton();
     }
@@ -85,7 +81,6 @@ public class BreathingAnalysis extends Activity{
                 // Do something in response to button click
                 out.println("Hallo ich bin ein Button");
                 if(button.getText().equals("Start")) {
-                    startTime = currentTimeMillis();
                     accelerationList.clear();
                     rotationList.clear();
                     magneticList.clear();
@@ -93,8 +88,9 @@ public class BreathingAnalysis extends Activity{
                     button.setText("Stop");
                 }
                 else {
-                    //new Normalizer(startTime, accelerationList, rotationList, magneticList, soundList);
-                    startTime = -1;
+                    MeasuredData measuredData = new MeasuredData(accelerationList, rotationList, magneticList, soundList);
+                    new DataPreprocessor(measuredData);
+                    //new DataLogger(measuredData);
                     button.setText("Start");
                 }
 
