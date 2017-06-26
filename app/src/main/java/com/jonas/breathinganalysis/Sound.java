@@ -16,15 +16,15 @@ class Sound {
         return timestamp;
     }
 
-    float getpitch() {
+    float getPitch() {
         return pitch;
     }
 
-    float getprobability() {
+    float getProbability() {
         return probability;
     }
 
-    double getspl() {
+    double getSpl() {
         return spl;
     }
 

@@ -1,6 +1,7 @@
 package com.jonas.breathinganalysis;
 
 import java.util.ArrayList;
+import java.util.List;
 
 class MeasuredData {
     private ArrayList<SensorDate> acceleration, rotation, magnet;
@@ -26,12 +27,22 @@ class MeasuredData {
     private double[] audioProbabilities;
     private double[] audioSpls;
 
+    private List<String[]> measuredDataSequence;
+
     MeasuredData(ArrayList<SensorDate> acceleration, ArrayList<SensorDate> rotation,
                     ArrayList<SensorDate> magnet, ArrayList<Sound> audio) {
         this.acceleration = acceleration;
         this.rotation = rotation;
         this.magnet = magnet;
         this.audio = audio;
+    }
+
+    void setMeasuredDataSequence(List<String[]> measuredDataSequence) {
+        this.measuredDataSequence = measuredDataSequence;
+    }
+
+    List<String[]> getMeasuredDataSequence() {
+        return measuredDataSequence;
     }
 
     ArrayList<SensorDate> getAcceleration() {

@@ -9,23 +9,15 @@ class DataPreprocessor {
     private void processData(MeasuredData measuredData) {
         removeRedundancies(measuredData);
         instantiateSensorDataArrays(measuredData);
-        /*measuredData.printAcceleration();
-        measuredData.printRotation();
-        measuredData.printMagnet();*/
-
         interpolateMeasurementResults(measuredData);
-        /*measuredData.printAcceleration();
-        measuredData.printRotation();
-        measuredData.printMagnet();
-        measuredData.printAudio();*/
-
         normalizeLength(measuredData);
 
-        //TODO: seems this gets called 2 times... fix
         measuredData.printAcceleration();
         measuredData.printRotation();
         measuredData.printMagnet();
         measuredData.printAudio();
+
+        instantiateMeasuredDataSequence(measuredData);
     }
 
     private void removeRedundancies(MeasuredData measuredData) {
@@ -37,10 +29,8 @@ class DataPreprocessor {
 
     private void instantiateSensorDataArrays(MeasuredData measuredData) {
         Normalizer.instantiateSensorDataArrays(measuredData, DataType.ACCELERATION);
-
         Normalizer.instantiateSensorDataArrays(measuredData, DataType.ROTATION);
         Normalizer.instantiateSensorDataArrays(measuredData, DataType.MAGNET);
-        //measuredData.printMagnet();
         Normalizer.instantiateAudioDataArrays(measuredData);
     }
 
@@ -159,5 +149,9 @@ class DataPreprocessor {
         System.out.println("Smallest End Timestamp: " + smallest);
 
         return smallest;
+    }
+
+    private void instantiateMeasuredDataSequence(MeasuredData measuredData) {
+        Normalizer.instantiateMeasuredDataSequence(measuredData);
     }
 }

@@ -1,6 +1,7 @@
 package com.jonas.breathinganalysis;
 
 
+import android.annotation.SuppressLint;
 import android.os.Environment;
 
 import com.opencsv.CSVWriter;
@@ -8,25 +9,37 @@ import com.opencsv.CSVWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 
 class DataLogger {
 
     DataLogger(MeasuredData measuredData) {
-
+        if(externalStorageIsWritable()) {
+            try {
+                log(measuredData.getMeasuredDataSequence());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            System.out.println("Problem logging the measured data to the external storage!");
+        }
     }
 
-    private static boolean isExternalStorageWritable() {
+    private static boolean externalStorageIsWritable() {
         return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
     }
 
-    static void log(String key, long timestamp, float value) throws IOException {
+    private static void log(List<String[]> list) throws IOException {
         //checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
-        System.out.println("isExternalStorageWritable(): " + isExternalStorageWritable());
+        //System.out.println("isExternalStorageWritable(): " + externalStorageIsWritable());
 
         File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        File file = new File(path, "Pitch.csv");
+        File file = new File(path, getCurrentDateTime() + "-measuredData.csv");
         System.out.println("file.getAbsolutePath(): " + file.getAbsolutePath());
         CSVWriter writer;
 
@@ -38,22 +51,29 @@ class DataLogger {
             //writer = new CSVWriter(mFileWriter);
         }
         else {
-            System.out.println("shit");
-
-            writer = new CSVWriter(new FileWriter(file.getAbsolutePath()));
+            System.out.println("Creating File: " + file.getName());
+            writer = new CSVWriter(new FileWriter(file.getAbsolutePath()), ';');
         }
-        String[] data = {Long.toString(timestamp),String.valueOf(value)};
-        String[] titles = {"timestamp", "pitch"};
 
-        System.out.println("Timestamp: " + timestamp + "\t + value: " + value);
+        /*String[] data = {Long.toString(timestamp),String.valueOf(value)};
+        String[] titles = {"timestamp", "acceleration for x-axis"};
 
-        //Titles
-        writer.writeNext(titles);
+        System.out.println("Timestamp: " + timestamp + "\t + value: " + value);*/
 
-        writer.writeNext(data);
 
-        System.out.println("Wrote data | Timestamp: " + timestamp + "\t + value: " + value);
+        writer.writeAll(list, true);
+
+        //writer.w
+
+        //writer.writeNext(data);
+
+        //System.out.println("Wrote data | Timestamp: " + timestamp + "\t + value: " + value);
 
         writer.close();
+    }
+
+    private static String getCurrentDateTime() {
+        @SuppressLint("SimpleDateFormat") DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+        return dateFormat.format(new Date());
     }
 }

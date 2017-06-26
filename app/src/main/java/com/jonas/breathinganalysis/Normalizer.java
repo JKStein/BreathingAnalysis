@@ -4,6 +4,7 @@ import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 import java.util.ArrayList;
+import java.util.List;
 
 class Normalizer {
     /**
@@ -54,9 +55,9 @@ class Normalizer {
         for(Sound dataEntry : list) {
             int i = list.indexOf(dataEntry);
             timestamps[i] = dataEntry.getTimestamp();
-            pitches[i] = dataEntry.getpitch();
-            probabilities[i] = dataEntry.getprobability();
-            spls[i] = dataEntry.getspl();
+            pitches[i] = dataEntry.getPitch();
+            probabilities[i] = dataEntry.getProbability();
+            spls[i] = dataEntry.getSpl();
         }
 
         measuredData.setAudioArrays(timestamps, pitches, probabilities, spls);
@@ -201,13 +202,42 @@ class Normalizer {
         int length = endIndex - startIndex + 1;
         double[] result = new double[length];
         System.arraycopy(array, startIndex, result, 0, length);
-        /*int j = 0;
-        for (double value : array) {
-            if (value >= startValue && value <= endValue) {
-                result[j] = value;
-                j++;
-            }
-        }*/
         return result;
+    }
+
+    static void instantiateMeasuredDataSequence(MeasuredData measuredData) {
+        List<String[]> measuredDataSequence = new ArrayList<>();
+
+        String[] columnHeadings = {"Timestamp", "x-axis acceleration", "y-axis acceleration", "z-axis acceleration",
+                "x-axis rotation", "y-axis rotation", "z-axis rotation", "x-axis magnetic", "y-axis magnetic",
+                "z-axis magnetic", "pitch", "probability", "spl"};
+
+        measuredDataSequence.add(columnHeadings);
+
+        for(int i = 0; i < measuredData.getAccelerationTimestamps().length; i++) {
+            String timestamp = String.valueOf(i);
+            String xAcceleration = Double.toString(measuredData.getAccelerationXValues()[i]);
+            String yAcceleration = Double.toString(measuredData.getAccelerationYValues()[i]);
+            String zAcceleration = Double.toString(measuredData.getAccelerationZValues()[i]);
+
+            String xGyroscope = Double.toString(measuredData.getRotationXValues()[i]);
+            String yGyroscope = Double.toString(measuredData.getRotationYValues()[i]);
+            String zGyroscope = Double.toString(measuredData.getRotationZValues()[i]);
+
+            String xMagnetometer = Double.toString(measuredData.getMagnetXValues()[i]);
+            String yMagnetometer = Double.toString(measuredData.getMagnetYValues()[i]);
+            String zMagnetometer = Double.toString(measuredData.getMagnetZValues()[i]);
+
+            String pitch = Double.toString(measuredData.getAudioPitches()[i]);
+            String probability = Double.toString(measuredData.getAudioProbabilities()[i]);
+            String spl = Double.toString(measuredData.getAudioSpls()[i]);
+
+            String[] data = {timestamp, xAcceleration, yAcceleration, zAcceleration,
+                    xGyroscope, yGyroscope, zGyroscope, xMagnetometer, yMagnetometer, zMagnetometer,
+                    pitch, probability, spl};
+            measuredDataSequence.add(data);
+        }
+
+        measuredData.setMeasuredDataSequence(measuredDataSequence);
     }
 }
