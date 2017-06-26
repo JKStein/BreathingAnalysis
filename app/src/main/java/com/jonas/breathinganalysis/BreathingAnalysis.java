@@ -90,7 +90,7 @@ public class BreathingAnalysis extends Activity{
                 else {
                     MeasuredData measuredData = new MeasuredData(accelerationList, rotationList, magneticList, soundList);
                     new DataPreprocessor(measuredData);
-                    //new DataLogger(measuredData);
+                    new DataLogger(measuredData);
                     button.setText("Start");
                 }
 
