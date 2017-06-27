@@ -41,9 +41,6 @@ public class BreathingAnalysis extends Activity{
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        //Testing of the interpolation tool:
-        //DataPreprocessor dataPreprocessor = new DataPreprocessor();
-
         accelerationList = new ArrayList<>();
         rotationList = new ArrayList<>();
         magneticList = new ArrayList<>();
@@ -72,14 +69,11 @@ public class BreathingAnalysis extends Activity{
         installButton();
     }
 
-
-
     private void installButton() {
         button = (Button) findViewById(R.id.button_send);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                // Do something in response to button click
-                out.println("Hallo ich bin ein Button");
+                System.out.println("Hallo ich bin ein Button");
                 if(button.getText().equals("Start")) {
                     accelerationList.clear();
                     rotationList.clear();
@@ -88,9 +82,7 @@ public class BreathingAnalysis extends Activity{
                     button.setText("Stop");
                 }
                 else {
-                    MeasuredData measuredData = new MeasuredData(accelerationList, rotationList, magneticList, soundList);
-                    new DataPreprocessor(measuredData);
-                    new DataLogger(measuredData);
+                    (new DataHandler(new MeasuredData(accelerationList, rotationList, magneticList, soundList))).start();
                     button.setText("Start");
                 }
 
@@ -106,7 +98,7 @@ public class BreathingAnalysis extends Activity{
             sensorManager.registerListener(accelerationMeasurement, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
         }
         else {
-            out.println("No Accelerometer available!");
+            System.out.println("No Accelerometer available!");
         }
     }
 
@@ -117,7 +109,7 @@ public class BreathingAnalysis extends Activity{
             sensorManager.registerListener(gyroscopicMeasurement, gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
         }
         else {
-            out.println("No Gyroscope available!");
+            System.out.println("No Gyroscope available!");
         }
     }
 

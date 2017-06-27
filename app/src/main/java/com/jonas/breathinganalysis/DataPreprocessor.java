@@ -21,9 +21,9 @@ class DataPreprocessor {
     }
 
     private void removeRedundancies(MeasuredData measuredData) {
-        Normalizer.removeSonsorDataRedundancies(measuredData.getAcceleration());
-        Normalizer.removeSonsorDataRedundancies(measuredData.getRotation());
-        Normalizer.removeSonsorDataRedundancies(measuredData.getMagnet());
+        Normalizer.removeSensorDataRedundancies(measuredData.getAcceleration());
+        Normalizer.removeSensorDataRedundancies(measuredData.getRotation());
+        Normalizer.removeSensorDataRedundancies(measuredData.getMagnet());
         Normalizer.removeAudioDataRedundancies(measuredData.getAudio());
     }
 

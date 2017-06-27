@@ -31,10 +31,10 @@ class MeasuredData {
 
     MeasuredData(ArrayList<SensorDate> acceleration, ArrayList<SensorDate> rotation,
                     ArrayList<SensorDate> magnet, ArrayList<Sound> audio) {
-        this.acceleration = acceleration;
-        this.rotation = rotation;
-        this.magnet = magnet;
-        this.audio = audio;
+        this.acceleration = new ArrayList<>(acceleration);
+        this.rotation = new ArrayList<>(rotation);
+        this.magnet = new ArrayList<>(magnet);
+        this.audio = new ArrayList<>(audio);
     }
 
     void setMeasuredDataSequence(List<String[]> measuredDataSequence) {

@@ -87,17 +87,12 @@ class Normalizer {
         int i = 0;
 
         for(SensorDate dataEntry : list) {
-            //dataEntry.print();
-            //System.out.println("i: " + i);
             timestamps[i] = dataEntry.getTimestamp();
             xValues[i] = dataEntry.getXValue();
             yValues[i] = dataEntry.getYValue();
             zValues[i] = dataEntry.getZValue();
             i++;
         }
-
-
-
         switch (dataType) {
             case ACCELERATION:
                 measuredData.setAccelerationArrays(timestamps, xValues, yValues, zValues);
@@ -122,7 +117,7 @@ class Normalizer {
      * @param list the sensor data to process
      * @return the average of lost information by deleting a redundant entry
      */
-    static double averageErrorOfSonsorDataRedundancies(ArrayList<SensorDate> list) {
+    static double averageErrorOfSensorDataRedundancies(ArrayList<SensorDate> list) {
         int amountOfRedundancies = 0;
         double overallRoundingError = 0;
         double averageEstimationError = 0;
@@ -145,7 +140,7 @@ class Normalizer {
      * deletes the redundant entries
      * @param list the sensor data to process
      */
-    static void removeSonsorDataRedundancies(ArrayList<SensorDate> list) {
+    static void removeSensorDataRedundancies(ArrayList<SensorDate> list) {
         for(int i = 0; i < list.size(); i++) {
             if(i > 0 && list.get(i-1).getTimestamp() >= list.get(i).getTimestamp()) {
                 list.remove(i);
