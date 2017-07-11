@@ -32,6 +32,7 @@ class DataPreprocessor {
         Normalizer.instantiateSensorDataArrays(measuredData, DataType.ROTATION);
         Normalizer.instantiateSensorDataArrays(measuredData, DataType.MAGNET);
         Normalizer.instantiateAudioDataArrays(measuredData);
+        Normalizer.instantiatePercussionDataArray(measuredData);
     }
 
     private void interpolateMeasurementResults(MeasuredData measuredData) {
@@ -57,7 +58,10 @@ class DataPreprocessor {
         double[] audioPitches = Normalizer.interpolate(measuredData.getAudioTimestamps(), measuredData.getAudioPitches());
         double[] audioProbabilities = Normalizer.interpolate(measuredData.getAudioTimestamps(), measuredData.getAudioProbabilities());
         double[] audioSpls = Normalizer.interpolate(measuredData.getAudioTimestamps(), measuredData.getAudioSpls());
-        measuredData.setAudioArrays(audioTimestamps, audioPitches, audioProbabilities, audioSpls);
+        double[] midiNoteNumbers = Normalizer.calculateMidiNumbers(audioPitches);
+        double[] deviations = Normalizer.calculateNoteDeviations(audioPitches);
+
+        measuredData.setAudioArrays(audioTimestamps, audioPitches, audioProbabilities, audioSpls, midiNoteNumbers, deviations);
     }
 
     private void normalizeLength(MeasuredData measuredData) {
@@ -98,7 +102,12 @@ class DataPreprocessor {
         double[] audioPitches = Normalizer.shrinkArray(audioStartIndex, audioEndIndex, measuredData.getAudioPitches());
         double[] audioProbabilities = Normalizer.shrinkArray(audioStartIndex, audioEndIndex, measuredData.getAudioProbabilities());
         double[] audioSpls = Normalizer.shrinkArray(audioStartIndex, audioEndIndex, measuredData.getAudioSpls());
-        measuredData.setAudioArrays(audioTimestamps, audioPitches, audioProbabilities, audioSpls);
+        double[] midiNoteNumbers = Normalizer.shrinkArray(audioStartIndex, audioEndIndex, measuredData.getAudioMidinoteNumber());
+        double[] deviations = Normalizer.shrinkArray(audioStartIndex, audioEndIndex, measuredData.getAudioNoteDeviation());
+        measuredData.setAudioArrays(audioTimestamps, audioPitches, audioProbabilities, audioSpls, midiNoteNumbers, deviations);
+
+        double[] percussionArray = Normalizer.filledPercussionArray(startTimestamp, endTimestamp, measuredData.getPercussionSignal());
+        measuredData.setPercussionArray(percussionArray);
     }
 
     private double getBiggestStartTimestamp(MeasuredData measuredData) {

@@ -11,7 +11,7 @@ import java.util.Locale;
 import static android.content.ContentValues.TAG;
 
 /**
- * The class implements a SensorEventListener for measure- and storing gyroscopic activities.
+ * Measures, stores and displays all available sensor data of the gyroscope.
  * @author Jonas Stein
  */
 class GyroscopicMeasurement implements SensorEventListener{
@@ -20,31 +20,33 @@ class GyroscopicMeasurement implements SensorEventListener{
     private TextView currentX, currentY, currentZ;
 
     /**
-     * Initializes the class variables.
-     * @param breathingAnalysis The main class object coordinating everything.
+     * Initializes the {@link android.widget.TextView TextViews} illustrating the sensor values.
+     * @param breathingAnalysis The main object running the UI and administrates the app.
      */
     GyroscopicMeasurement(BreathingAnalysis breathingAnalysis) {
         this.breathingAnalysis = breathingAnalysis;
-        initializeViews();
+        currentX = (TextView) breathingAnalysis.findViewById(R.id.currentXG);
+        currentY = (TextView) breathingAnalysis.findViewById(R.id.currentYG);
+        currentZ = (TextView) breathingAnalysis.findViewById(R.id.currentZG);
     }
 
     /**
-     * Gets called when sensor values have changed.
-     * Updates the TextViews illustrating the current gyroscopic sensor data values and
-     * adds the new data to the respective ArrayList of breathingAnalysis.
-     * @param event The SensorEvent that has occurred containing the newly captured sensor values.
+     * Updates the TextViews illustrating the current gyroscope sensor values and
+     * adds the new data to the respective ArrayList in breathingAnalysis.
+     * Gets called when there is a new SensorEvent.
+     * @param event The SensorEvent that has been sent, containing the newly captured sensor values.
      */
     @Override
     public void onSensorChanged(SensorEvent event) {
-        //display new values
+        //Display the new sensor values.
 
-        //Float.toString would give warning, because the separator (dot or comma) is unknown
+        //Float.toString could not work properly, because the separator (dot or comma) is unknown.
         currentX.setText(String.format(Locale.US, "%f", event.values[0]));
         currentY.setText(String.format(Locale.US, "%f", event.values[1]));
         currentZ.setText(String.format(Locale.US, "%f", event.values[2]));
 
-        //Add new values to series of measurement
-        breathingAnalysis.rotationList.add(new SensorDate(System.currentTimeMillis(), event.values[0], event.values[1], event.values[2]));
+        //Add new values to the series of measurement.
+        breathingAnalysis.rotationSensorValues.add(new SensorDate(System.currentTimeMillis(), event.values[0], event.values[1], event.values[2]));
     }
 
     /**
@@ -64,14 +66,5 @@ class GyroscopicMeasurement implements SensorEventListener{
             case 3:
                 Log.d(TAG, "The accuracy of the gyroscope has changed to: high");
         }
-    }
-
-    /**
-     * Initializes the TextViews illustrating the sensor data.
-     */
-    private void initializeViews() {
-        currentX = (TextView) breathingAnalysis.findViewById(R.id.currentXG);
-        currentY = (TextView) breathingAnalysis.findViewById(R.id.currentYG);
-        currentZ = (TextView) breathingAnalysis.findViewById(R.id.currentZG);
     }
 }

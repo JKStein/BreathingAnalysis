@@ -4,12 +4,16 @@ class Sound {
     private long timestamp;
     private float pitch, probability;
     private double spl;
+    private int midiNote;
+    private double deviation;
 
-    Sound(long timestamp, float pitch, float probability, double spl) {
+    Sound(long timestamp, float pitch, float probability, double spl, int midiNote, double deviation) {
         this.timestamp = timestamp;
         this.pitch = pitch;
         this.probability = probability;
         this.spl = spl;
+        this.midiNote = midiNote;
+        this.deviation = deviation;
     }
 
     long getTimestamp() {
@@ -26,6 +30,14 @@ class Sound {
 
     double getSpl() {
         return spl;
+    }
+
+    int getMidiNote() {
+        return midiNote;
+    }
+
+    double getDeviation() {
+        return deviation;
     }
 
     public String toString() {
