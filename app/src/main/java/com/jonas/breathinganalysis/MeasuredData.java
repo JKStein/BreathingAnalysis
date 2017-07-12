@@ -6,6 +6,7 @@ import java.util.List;
 class MeasuredData {
     private ArrayList<SensorDate> acceleration, rotation, magnet;
     private ArrayList<Sound> audio;
+    private ArrayList<Long> percussion;
 
     private double[] accelerationTimestamps;
     private double[] accelerationXValues;
@@ -26,15 +27,20 @@ class MeasuredData {
     private double[] audioPitches;
     private double[] audioProbabilities;
     private double[] audioSpls;
+    private double[] audioMidiNoteNumber;
+    private double[] audioNoteDeviation;
+
+    private double[] percussionSignal;
 
     private List<String[]> measuredDataSequence;
 
     MeasuredData(ArrayList<SensorDate> acceleration, ArrayList<SensorDate> rotation,
-                    ArrayList<SensorDate> magnet, ArrayList<Sound> audio) {
-        this.acceleration = acceleration;
-        this.rotation = rotation;
-        this.magnet = magnet;
-        this.audio = audio;
+                    ArrayList<SensorDate> magnet, ArrayList<Sound> audio, ArrayList<Long> percussion) {
+        this.acceleration = new ArrayList<>(acceleration);
+        this.rotation = new ArrayList<>(rotation);
+        this.magnet = new ArrayList<>(magnet);
+        this.audio = new ArrayList<>(audio);
+        this.percussion = new ArrayList<>(percussion);
     }
 
     void setMeasuredDataSequence(List<String[]> measuredDataSequence) {
@@ -61,6 +67,10 @@ class MeasuredData {
         return audio;
     }
 
+    ArrayList<Long> getPercussion() {
+        return percussion;
+    }
+
     void setAccelerationArrays(double[] timestamps, double[] xValues, double[] yValues, double[] zValues) {
         this.accelerationTimestamps = timestamps;
         this.accelerationXValues = xValues;
@@ -82,11 +92,17 @@ class MeasuredData {
         this.magnetZValues = zValues;
     }
 
-    void setAudioArrays(double[] timestamps, double[] pitches, double[] probabilities, double[] spls) {
+    void setAudioArrays(double[] timestamps, double[] pitches, double[] probabilities, double[] spls, double[] midiNoteNumbers, double[] deviations) {
         this.audioTimestamps = timestamps;
         this.audioPitches = pitches;
         this.audioProbabilities = probabilities;
         this.audioSpls = spls;
+        this.audioMidiNoteNumber = midiNoteNumbers;
+        this.audioNoteDeviation = deviations;
+    }
+
+    void setPercussionArray(double[] entries) {
+        this.percussionSignal = entries;
     }
 
     ArrayList<SensorDate> getArrayList(DataType dataType) {
@@ -164,6 +180,18 @@ class MeasuredData {
 
     double[] getAudioSpls() {
         return audioSpls;
+    }
+
+    double[] getAudioMidiNoteNumber() {
+        return audioMidiNoteNumber;
+    }
+
+    double[] getAudioNoteDeviation() {
+        return audioNoteDeviation;
+    }
+
+    double[] getPercussionSignal() {
+        return percussionSignal;
     }
 
     boolean isIncomplete() {

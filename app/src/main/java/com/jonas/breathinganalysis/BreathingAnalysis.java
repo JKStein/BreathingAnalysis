@@ -1,35 +1,32 @@
 package com.jonas.breathinganalysis;
 
-import android.os.Bundle;
-
 import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import java.util.ArrayList;
+import static android.content.ContentValues.TAG;
 
 //import com.jonas.breathinganalysis.Deprecated.DBChartManager;
 //import com.jonas.breathinganalysis.Deprecated.DBMeasurement;
 
-import java.util.ArrayList;
-
-import static java.lang.System.*;
-
 public class BreathingAnalysis extends Activity{
 
-    ArrayList<SensorDate> accelerationList;
-    ArrayList<SensorDate> rotationList;
-    ArrayList<SensorDate> magneticList;
-    ArrayList<Sound> soundList;
+    ArrayList<SensorDate> accelerationSensorValues, rotationSensorValues, magnetSensorValues;
+    ArrayList<Sound> soundEventValues;
+    ArrayList<Long> percussionEventValues;
 
-    AccelerationMeasurement accelerationMeasurement;
+    AccelerationRecorder accelerationRecorder;
     //AccelerationChartManager accelerationChartManager;
 
-    GyroscopicMeasurement gyroscopicMeasurement;
+    RotationRecorder rotationRecorder;
 
-    MagneticMeasurement magneticMeasurement;
+    MagnetRecorder magnetRecorder;
 
     //DBMeasurement dbMeasurement;
     //DBChartManager dbChartManager;
@@ -37,26 +34,28 @@ public class BreathingAnalysis extends Activity{
     private SensorManager sensorManager;
     private Sensor accelerometer, gyroscope, magnetometer;
 
-    Button button;
+    private Button measurementController;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        //Testing of the interpolation tool:
-        //DataPreprocessor dataPreprocessor = new DataPreprocessor();
-
-        accelerationList = new ArrayList<>();
-        rotationList = new ArrayList<>();
-        magneticList = new ArrayList<>();
-        soundList = new ArrayList<>();
+        accelerationSensorValues = new ArrayList<>();
+        rotationSensorValues = new ArrayList<>();
+        magnetSensorValues = new ArrayList<>();
+        soundEventValues = new ArrayList<>();
+        percussionEventValues = new ArrayList<>();
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        accelerationMeasurement = new AccelerationMeasurement(this);
-        gyroscopicMeasurement = new GyroscopicMeasurement(this);
-        magneticMeasurement = new MagneticMeasurement(this);
+
+        accelerationRecorder = new AccelerationRecorder(this);
+        rotationRecorder = new RotationRecorder(this);
+        magnetRecorder = new MagnetRecorder(this);
         //accelerationChartManager = new AccelerationChartManager(this);
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+
+        new AudioHandler(this);
+
         installAccelerometer();
         installGyroscope();
         installMagnetometer();
@@ -67,68 +66,59 @@ public class BreathingAnalysis extends Activity{
         //dbMeasurement.startRecorder();
 
         //audio processing
-        new AudioHandler(this);
-
         installButton();
     }
 
-
-
     private void installButton() {
-        button = (Button) findViewById(R.id.button_send);
-        button.setOnClickListener(new View.OnClickListener() {
+        measurementController = (Button) findViewById(R.id.button_send);
+        measurementController.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                // Do something in response to button click
-                out.println("Hallo ich bin ein Button");
-                if(button.getText().equals("Start")) {
-                    accelerationList.clear();
-                    rotationList.clear();
-                    magneticList.clear();
-                    soundList.clear();
-                    button.setText("Stop");
+                if(measurementController.getText().equals("Start")) {
+                    accelerationSensorValues.clear();
+                    rotationSensorValues.clear();
+                    magnetSensorValues.clear();
+                    soundEventValues.clear();
+                    measurementController.setText(R.string.stop);
                 }
                 else {
-                    MeasuredData measuredData = new MeasuredData(accelerationList, rotationList, magneticList, soundList);
-                    new DataPreprocessor(measuredData);
-                    new DataLogger(measuredData);
-                    button.setText("Start");
+                    (new DataHandler(new MeasuredData(accelerationSensorValues, rotationSensorValues,  magnetSensorValues, soundEventValues, percussionEventValues))).start();
+                    measurementController.setText(R.string.start);
                 }
 
             }
         });
     }
 
-
+    /**
+     * Initializes
+     */
     private void installAccelerometer() {
         if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-            // success! we have an accelerometer
             accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            sensorManager.registerListener(accelerationMeasurement, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+            sensorManager.registerListener(accelerationRecorder, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
         }
         else {
-            out.println("No Accelerometer available!");
+            Log.d(TAG, "No Accelerometer available!");
         }
     }
 
     private void installGyroscope() {
         if (sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null) {
-            // success! we have a gyroscope
             gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-            sensorManager.registerListener(gyroscopicMeasurement, gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
+            sensorManager.registerListener(rotationRecorder, gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
         }
         else {
-            out.println("No Gyroscope available!");
+            Log.d(TAG, "No Gyroscope available!");
         }
     }
 
     private void installMagnetometer() {
         if (sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null) {
-            // success! we have a magnetometer
             magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-            sensorManager.registerListener(magneticMeasurement, magnetometer, SensorManager.SENSOR_DELAY_FASTEST);
+            sensorManager.registerListener(magnetRecorder, magnetometer, SensorManager.SENSOR_DELAY_FASTEST);
         }
         else {
-            out.println("No Magnetometer available!");
+            Log.d(TAG, "No MagnetRecorder available!");
         }
     }
 
@@ -140,16 +130,16 @@ public class BreathingAnalysis extends Activity{
     @Override
     protected void onResume() {
         super.onResume();
-        sensorManager.registerListener(accelerationMeasurement, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
-        sensorManager.registerListener(gyroscopicMeasurement, gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
-        sensorManager.registerListener(magneticMeasurement, magnetometer, SensorManager.SENSOR_DELAY_FASTEST);
+        sensorManager.registerListener(accelerationRecorder, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+        sensorManager.registerListener(rotationRecorder, gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
+        sensorManager.registerListener(magnetRecorder, magnetometer, SensorManager.SENSOR_DELAY_FASTEST);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        sensorManager.unregisterListener(accelerationMeasurement);
-        sensorManager.unregisterListener(gyroscopicMeasurement);
-        sensorManager.unregisterListener(magneticMeasurement);
+        sensorManager.unregisterListener(accelerationRecorder);
+        sensorManager.unregisterListener(rotationRecorder);
+        sensorManager.unregisterListener(magnetRecorder);
     }
 }

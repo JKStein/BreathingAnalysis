@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">BreathingAnalysis</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="accelerometer">Accelerometer:</string>
+    <string name="xAxis">x-axis</string>
+    <string name="yAxis">y-axis</string>
+    <string name="zAxis">z-axis</string>
+    <string name="defaultFloat">0.0</string>
 </resources>
