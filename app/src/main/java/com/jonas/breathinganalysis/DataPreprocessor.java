@@ -102,7 +102,7 @@ class DataPreprocessor {
         double[] audioPitches = Normalizer.shrinkArray(audioStartIndex, audioEndIndex, measuredData.getAudioPitches());
         double[] audioProbabilities = Normalizer.shrinkArray(audioStartIndex, audioEndIndex, measuredData.getAudioProbabilities());
         double[] audioSpls = Normalizer.shrinkArray(audioStartIndex, audioEndIndex, measuredData.getAudioSpls());
-        double[] midiNoteNumbers = Normalizer.shrinkArray(audioStartIndex, audioEndIndex, measuredData.getAudioMidinoteNumber());
+        double[] midiNoteNumbers = Normalizer.shrinkArray(audioStartIndex, audioEndIndex, measuredData.getAudioMidiNoteNumber());
         double[] deviations = Normalizer.shrinkArray(audioStartIndex, audioEndIndex, measuredData.getAudioNoteDeviation());
         measuredData.setAudioArrays(audioTimestamps, audioPitches, audioProbabilities, audioSpls, midiNoteNumbers, deviations);
 

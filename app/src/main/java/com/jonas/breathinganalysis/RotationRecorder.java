@@ -14,7 +14,7 @@ import static android.content.ContentValues.TAG;
  * Measures, stores and displays all available sensor data of the gyroscope.
  * @author Jonas Stein
  */
-class GyroscopicMeasurement implements SensorEventListener{
+class RotationRecorder implements SensorEventListener{
 
     private BreathingAnalysis breathingAnalysis;
     private TextView currentX, currentY, currentZ;
@@ -23,7 +23,7 @@ class GyroscopicMeasurement implements SensorEventListener{
      * Initializes the {@link android.widget.TextView TextViews} illustrating the sensor values.
      * @param breathingAnalysis The main object running the UI and administrates the app.
      */
-    GyroscopicMeasurement(BreathingAnalysis breathingAnalysis) {
+    RotationRecorder(BreathingAnalysis breathingAnalysis) {
         this.breathingAnalysis = breathingAnalysis;
         currentX = (TextView) breathingAnalysis.findViewById(R.id.currentXG);
         currentY = (TextView) breathingAnalysis.findViewById(R.id.currentYG);

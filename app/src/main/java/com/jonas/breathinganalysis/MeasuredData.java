@@ -27,7 +27,7 @@ class MeasuredData {
     private double[] audioPitches;
     private double[] audioProbabilities;
     private double[] audioSpls;
-    private double[] audioMidinoteNumber;
+    private double[] audioMidiNoteNumber;
     private double[] audioNoteDeviation;
 
     private double[] percussionSignal;
@@ -97,7 +97,7 @@ class MeasuredData {
         this.audioPitches = pitches;
         this.audioProbabilities = probabilities;
         this.audioSpls = spls;
-        this.audioMidinoteNumber = midiNoteNumbers;
+        this.audioMidiNoteNumber = midiNoteNumbers;
         this.audioNoteDeviation = deviations;
     }
 
@@ -182,8 +182,8 @@ class MeasuredData {
         return audioSpls;
     }
 
-    double[] getAudioMidinoteNumber() {
-        return audioMidinoteNumber;
+    double[] getAudioMidiNoteNumber() {
+        return audioMidiNoteNumber;
     }
 
     double[] getAudioNoteDeviation() {

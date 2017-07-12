@@ -3,18 +3,18 @@ package com.jonas.breathinganalysis;
 enum DataType {
     ACCELERATION, ROTATION, MAGNET;
 
-    void print() {
+    public String toString() {
         if(this == ACCELERATION) {
-            System.out.println("ACCELERATION");
+            return "ACCELERATION";
         }
         else if(this == ROTATION) {
-            System.out.println("ROTATION");
+            return "ROTATION";
         }
         else if(this == MAGNET) {
-            System.out.println("MAGNET");
+            return "MAGNET";
         }
         else {
-            System.out.println("DAFUQ");
+            return "UNASSIGNED";
         }
     }
 }

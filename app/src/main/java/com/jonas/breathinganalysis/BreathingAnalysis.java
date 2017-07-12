@@ -24,7 +24,7 @@ public class BreathingAnalysis extends Activity{
     AccelerationRecorder accelerationRecorder;
     //AccelerationChartManager accelerationChartManager;
 
-    GyroscopicMeasurement rotationRecorder;
+    RotationRecorder rotationRecorder;
 
     MagnetRecorder magnetRecorder;
 
@@ -48,7 +48,7 @@ public class BreathingAnalysis extends Activity{
         setContentView(R.layout.activity_main);
 
         accelerationRecorder = new AccelerationRecorder(this);
-        rotationRecorder = new GyroscopicMeasurement(this);
+        rotationRecorder = new RotationRecorder(this);
         magnetRecorder = new MagnetRecorder(this);
         //accelerationChartManager = new AccelerationChartManager(this);
 

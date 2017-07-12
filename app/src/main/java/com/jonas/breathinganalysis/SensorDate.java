@@ -33,8 +33,4 @@ class SensorDate {
     public String toString() {
         return "timestamp: " + timestamp + "  ||  x: " + xValue + " | y: " + yValue + " | z: " + zValue;
     }
-
-    void print() {
-        System.out.println(toString());
-    }
 }

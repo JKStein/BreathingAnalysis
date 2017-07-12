@@ -289,7 +289,7 @@ class Normalizer {
             String probability = Double.toString(measuredData.getAudioProbabilities()[i]);
             String spl = Double.toString(measuredData.getAudioSpls()[i]);
 
-            String midiNote = Double.toString(measuredData.getAudioMidinoteNumber()[i]);
+            String midiNote = Double.toString(measuredData.getAudioMidiNoteNumber()[i]);
             String deviation = Double.toString(measuredData.getAudioNoteDeviation()[i]);
 
             String percussion = Double.toString(measuredData.getPercussionSignal()[i]);
