@@ -16,12 +16,19 @@ import static android.content.ContentValues.TAG;
  */
 class RotationRecorder implements SensorEventListener{
 
+    /**
+     * The main object running the UI and administrating the app.
+     */
     private BreathingAnalysis breathingAnalysis;
+    /**
+     * The {@link android.widget.TextView TextViews} illustrating the sensor values.
+     */
     private TextView currentX, currentY, currentZ;
 
     /**
-     * Initializes the {@link android.widget.TextView TextViews} illustrating the sensor values.
-     * @param breathingAnalysis The main object running the UI and administrates the app.
+     * Initializes the {@link android.widget.TextView TextViews} illustrating the sensor values,
+     * as well as the attribute breathingAnalysis with the object passed to the constructor.
+     * @param breathingAnalysis The main object running the UI and administrating the app.
      */
     RotationRecorder(BreathingAnalysis breathingAnalysis) {
         this.breathingAnalysis = breathingAnalysis;
@@ -46,7 +53,7 @@ class RotationRecorder implements SensorEventListener{
         currentZ.setText(String.format(Locale.US, "%f", event.values[2]));
 
         //Add new values to the series of measurement.
-        breathingAnalysis.rotationSensorValues.add(new SensorDate(System.currentTimeMillis(), event.values[0], event.values[1], event.values[2]));
+        breathingAnalysis.rotationSensorValues.add(new SensorDate(event.timestamp / 1000000L, event.values[0], event.values[1], event.values[2]));
     }
 
     /**

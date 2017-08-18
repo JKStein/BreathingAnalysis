@@ -5,7 +5,9 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.util.Log;
 import android.widget.TextView;
+
 import java.util.Locale;
+
 import static android.content.ContentValues.TAG;
 
 /**
@@ -13,12 +15,20 @@ import static android.content.ContentValues.TAG;
  * @author Jonas Stein
  */
 class AccelerationRecorder implements SensorEventListener {
+
+    /**
+     * The main object running the UI and administrating the app.
+     */
     private BreathingAnalysis breathingAnalysis;
+    /**
+     * The {@link android.widget.TextView TextViews} illustrating the sensor values.
+     */
     private TextView currentX, currentY, currentZ;
 
     /**
-     * Initializes the {@link android.widget.TextView TextViews} illustrating the sensor values.
-     * @param breathingAnalysis The main object running the UI and administrates the app.
+     * Initializes the {@link android.widget.TextView TextViews} illustrating the sensor values,
+     * as well as the attribute breathingAnalysis with the object passed to the constructor.
+     * @param breathingAnalysis The main object running the UI and administrating the app.
      */
     AccelerationRecorder(BreathingAnalysis breathingAnalysis) {
         this.breathingAnalysis = breathingAnalysis;
@@ -44,8 +54,14 @@ class AccelerationRecorder implements SensorEventListener {
         currentY.setText(String.format(Locale.US, "%f", event.values[1]));
         currentZ.setText(String.format(Locale.US, "%f", event.values[2]));
 
+
+        /*System.out.println("uptimeMills(): " + uptimeMillis());
+        System.out.println("event.timestamp: " + event.timestamp / 1000000L);*/
+
         //Add new values to the series of measurement.
-        breathingAnalysis.accelerationSensorValues.add(new SensorDate(System.currentTimeMillis(), event.values[0], event.values[1], event.values[2]));
+        //Using event.timestamp would not be consistent with other measurements, because event.timestamp
+        //is not the actual system time, but the nanoseconds of uptime.
+        breathingAnalysis.accelerationSensorValues.add(new SensorDate(event.timestamp / 1000000L, event.values[0], event.values[1], event.values[2]));
     }
 
     /**

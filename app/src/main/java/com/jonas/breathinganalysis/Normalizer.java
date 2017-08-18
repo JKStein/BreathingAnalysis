@@ -254,9 +254,11 @@ class Normalizer {
     }
 
     private static boolean contains(final double[] array, double value) {
-        for (double entry:array) {
-            if(entry == value) {
-                return true;
+        if(array != null) {
+            for (double entry : array) {
+                if (entry == value) {
+                    return true;
+                }
             }
         }
         return false;
@@ -398,6 +400,11 @@ class Normalizer {
         return result;
     }
 
+    /**
+     *
+     * @param frequencies
+     * @return
+     */
     static double[] calculateNoteDeviations(double[] frequencies) {
         if(frequencies.length < 1) {
             return new double[0];

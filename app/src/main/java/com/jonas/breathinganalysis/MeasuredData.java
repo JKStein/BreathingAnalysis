@@ -34,13 +34,16 @@ class MeasuredData {
 
     private List<String[]> measuredDataSequence;
 
+    private double bestFittingStartTimestamp;
+
     MeasuredData(ArrayList<SensorDate> acceleration, ArrayList<SensorDate> rotation,
-                    ArrayList<SensorDate> magnet, ArrayList<Sound> audio, ArrayList<Long> percussion) {
+                    ArrayList<SensorDate> magnet, ArrayList<Sound> audio, ArrayList<Long> percussion, double bestFittingStartTimestamp) {
         this.acceleration = new ArrayList<>(acceleration);
         this.rotation = new ArrayList<>(rotation);
         this.magnet = new ArrayList<>(magnet);
         this.audio = new ArrayList<>(audio);
         this.percussion = new ArrayList<>(percussion);
+        this.bestFittingStartTimestamp = bestFittingStartTimestamp;
     }
 
     void setMeasuredDataSequence(List<String[]> measuredDataSequence) {
@@ -228,5 +231,13 @@ class MeasuredData {
             System.out.println("Audio: \ni: " + i + " | Timestamp: " + audioTimestamps[i] + " | pitch: " + audioPitches[i] + " | probability: " +
                     audioProbabilities[i] + " | SPL: " + audioSpls[i]);
         }
+    }
+
+    double getBestFittingStartTimestamp() {
+        return bestFittingStartTimestamp;
+    }
+
+    void setBestFittingStartTimestamp(double bestFittingStartTimestamp) {
+        this.bestFittingStartTimestamp = bestFittingStartTimestamp;
     }
 }

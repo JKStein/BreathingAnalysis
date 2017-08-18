@@ -12,10 +12,10 @@ class DataPreprocessor {
         interpolateMeasurementResults(measuredData);
         normalizeLength(measuredData);
 
-        measuredData.printAcceleration();
+        /*measuredData.printAcceleration();
         measuredData.printRotation();
         measuredData.printMagnet();
-        measuredData.printAudio();
+        measuredData.printAudio();*/
 
         instantiateMeasuredDataSequence(measuredData);
     }
@@ -130,6 +130,9 @@ class DataPreprocessor {
         if(audioStartTimestamp > biggest) {
             biggest = audioStartTimestamp;
         }
+        if(measuredData.getBestFittingStartTimestamp() > biggest) {
+            biggest = measuredData.getBestFittingStartTimestamp();
+        }
 
         System.out.println("Biggest Start Timestamp: " + biggest);
         return biggest;
@@ -154,6 +157,12 @@ class DataPreprocessor {
         }
         if(audioEndTimestamp < smallest) {
             smallest = audioEndTimestamp;
+        }
+        if(getBiggestStartTimestamp(measuredData) + 32000 < smallest) {
+            smallest = getBiggestStartTimestamp(measuredData) + 32000;
+        }
+        else {
+            System.out.println("Test cut off to soon!");
         }
         System.out.println("Smallest End Timestamp: " + smallest);
 

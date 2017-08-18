@@ -14,6 +14,7 @@ import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 
+import static android.os.SystemClock.uptimeMillis;
 import static com.jonas.breathinganalysis.Normalizer.getMidiNote;
 
 class AudioHandler {
@@ -47,7 +48,7 @@ class AudioHandler {
                     @Override
                     public void run() {
                         displayCurrentValues(pitchInHz, probability);
-                        breathingAnalysis.soundEventValues.add(new Sound(System.currentTimeMillis(), pitchInHz, probability,
+                        breathingAnalysis.soundEventValues.add(new Sound(uptimeMillis(), pitchInHz, probability,
                                 currentSP, getMidiNote(pitchInHz, Normalizer.DEFAULT_TUNING),
                                 Normalizer.getPitchDeviation(pitchInHz, Normalizer.DEFAULT_TUNING)));
                     }
@@ -63,7 +64,7 @@ class AudioHandler {
                      @Override
                      public void run() {
                          displayPercussionEvent();
-                         breathingAnalysis.percussionEventValues.add(System.currentTimeMillis());
+                         breathingAnalysis.percussionEventValues.add(uptimeMillis());
                      }
                  });
              }

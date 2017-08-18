@@ -38,7 +38,7 @@ class DataLogger {
 
         //System.out.println("isExternalStorageWritable(): " + externalStorageIsWritable());
 
-        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
         File file = new File(path, getCurrentDateTime() + "-measuredData.csv");
         System.out.println("file.getAbsolutePath(): " + file.getAbsolutePath());
         CSVWriter writer;
