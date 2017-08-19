@@ -29,6 +29,8 @@ class Metronome implements Runnable {
     private int amountOfBars;
     private int totalAmountOfBeats;
 
+
+
     /**
      * Standard constructor, constructs a metronome with common time and 60 beats per minute.
      * @param soundPool
@@ -105,7 +107,7 @@ class Metronome implements Runnable {
             breathingAnalysis.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    breathingAnalysis.setBestFittingStartTimestamp(newGetBestFittingStartTimestamp(beatTimestamps, durationOfOneBeat));
+                    breathingAnalysis.setStuffForDataHandler(newGetBestFittingStartTimestamp(beatTimestamps, durationOfOneBeat), totalAmountOfBeats * durationOfOneBeat);
                 }
             });
         }

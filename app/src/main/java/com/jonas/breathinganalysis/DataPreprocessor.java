@@ -158,8 +158,8 @@ class DataPreprocessor {
         if(audioEndTimestamp < smallest) {
             smallest = audioEndTimestamp;
         }
-        if(getBiggestStartTimestamp(measuredData) + 32000 < smallest) {
-            smallest = getBiggestStartTimestamp(measuredData) + 32000;
+        if(getBiggestStartTimestamp(measuredData) + measuredData.getOverallDuration() < smallest) {
+            smallest = getBiggestStartTimestamp(measuredData) + measuredData.getOverallDuration();
         }
         else {
             System.out.println("Test cut off to soon!");

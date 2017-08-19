@@ -35,15 +35,18 @@ class MeasuredData {
     private List<String[]> measuredDataSequence;
 
     private double bestFittingStartTimestamp;
+    private long overallDuration;
 
     MeasuredData(ArrayList<SensorDate> acceleration, ArrayList<SensorDate> rotation,
-                    ArrayList<SensorDate> magnet, ArrayList<Sound> audio, ArrayList<Long> percussion, double bestFittingStartTimestamp) {
+                    ArrayList<SensorDate> magnet, ArrayList<Sound> audio, ArrayList<Long> percussion,
+                 double bestFittingStartTimestamp, long overallDuration) {
         this.acceleration = new ArrayList<>(acceleration);
         this.rotation = new ArrayList<>(rotation);
         this.magnet = new ArrayList<>(magnet);
         this.audio = new ArrayList<>(audio);
         this.percussion = new ArrayList<>(percussion);
         this.bestFittingStartTimestamp = bestFittingStartTimestamp;
+        this.overallDuration = overallDuration;
     }
 
     void setMeasuredDataSequence(List<String[]> measuredDataSequence) {
@@ -237,7 +240,7 @@ class MeasuredData {
         return bestFittingStartTimestamp;
     }
 
-    void setBestFittingStartTimestamp(double bestFittingStartTimestamp) {
-        this.bestFittingStartTimestamp = bestFittingStartTimestamp;
+    long getOverallDuration() {
+        return overallDuration;
     }
 }

@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -18,18 +19,24 @@ import static android.content.ContentValues.TAG;
 
 public class BreathingAnalysis extends Activity{
 
-    ArrayList<SensorDate> accelerationSensorValues, rotationSensorValues, magnetSensorValues;
     ArrayList<Sound> soundEventValues;
     ArrayList<Long> percussionEventValues;
 
-    AccelerationRecorder accelerationRecorder;
-    RotationRecorder rotationRecorder;
-    MagnetRecorder magnetRecorder;
+    SensorRecorder accelerationRecorder;
+    SensorRecorder rotationRecorder;
+    SensorRecorder magnetRecorder;
 
     private SensorManager sensorManager;
     private Sensor accelerometer, gyroscope, magnetometer;
 
     private Button measurementController;
+
+    /**
+     * The {@link android.widget.TextView TextViews} illustrating the sensor values of all sensors.
+     */
+    private TextView xAxisAccelerometer, yAxisAccelerometer, zAxisAccelerometer;
+    private TextView xAxisGyroscope, yAxisGyroscope, zAxisGyroscope;
+    private TextView xAxisMagnetometer, yAxisMagnetometer, zAxisMagnetometer;
 
     SoundPool soundPool;
     int tick, tock;
@@ -42,17 +49,19 @@ public class BreathingAnalysis extends Activity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        accelerationSensorValues = new ArrayList<>();
-        rotationSensorValues = new ArrayList<>();
-        magnetSensorValues = new ArrayList<>();
         soundEventValues = new ArrayList<>();
         percussionEventValues = new ArrayList<>();
 
-        accelerationRecorder = new AccelerationRecorder(this);
-        rotationRecorder = new RotationRecorder(this);
-        magnetRecorder = new MagnetRecorder(this);
+        initializeTextViews();
+
+        accelerationRecorder = new SensorRecorder(xAxisAccelerometer, yAxisAccelerometer, zAxisAccelerometer);
+        rotationRecorder = new SensorRecorder(xAxisGyroscope, yAxisGyroscope, zAxisGyroscope);
+        magnetRecorder = new SensorRecorder(xAxisMagnetometer, yAxisMagnetometer, zAxisMagnetometer);
+
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+
+
 
         initializeAndRegisterAccelerometer();
         initializeAndRegisterGyroscope();
@@ -75,15 +84,12 @@ public class BreathingAnalysis extends Activity{
         measurementController.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if(measurementController.getText().equals("Start")) {
+                    startRecording();
                     handler.post(metronome);
-
-                    accelerationSensorValues.clear();
-                    rotationSensorValues.clear();
-                    magnetSensorValues.clear();
-                    soundEventValues.clear();
                     measurementController.setText(R.string.stop);
                 }
                 else {
+                    stopRecording();
                     metronome.reset();
                     handler.removeCallbacks(metronome);
                     measurementController.setText(R.string.start);
@@ -94,8 +100,8 @@ public class BreathingAnalysis extends Activity{
     }
 
 
-    void setBestFittingStartTimestamp(long bestFittingStartTimestamp) {
-        (new DataHandler(new MeasuredData(accelerationSensorValues, rotationSensorValues,  magnetSensorValues, soundEventValues, percussionEventValues, bestFittingStartTimestamp))).start();
+    void setStuffForDataHandler(long bestFittingStartTimestamp, long overallDuration) {
+        (new DataHandler(new MeasuredData(accelerationRecorder.getSensorData(), rotationRecorder.getSensorData(),  magnetRecorder.getSensorData(), soundEventValues, percussionEventValues, bestFittingStartTimestamp, overallDuration))).start();
         measurementController.performClick();
     }
 
@@ -126,8 +132,23 @@ public class BreathingAnalysis extends Activity{
             sensorManager.registerListener(magnetRecorder, magnetometer, SensorManager.SENSOR_DELAY_FASTEST);
         }
         else {
-            Log.d(TAG, "No MagnetRecorder available!");
+            Log.d(TAG, "No Magnetometer available!");
         }
+    }
+
+    private void startRecording() {
+        accelerationRecorder.startRecording();
+        rotationRecorder.startRecording();
+        magnetRecorder.startRecording();
+    }
+
+    private void stopRecording() {
+        accelerationRecorder.stopRecording();
+        rotationRecorder.stopRecording();
+        magnetRecorder.stopRecording();
+        accelerationRecorder.clearSensorData();
+        rotationRecorder.clearSensorData();
+        magnetRecorder.clearSensorData();
     }
 
     @Override
@@ -149,5 +170,19 @@ public class BreathingAnalysis extends Activity{
         sensorManager.unregisterListener(accelerationRecorder);
         sensorManager.unregisterListener(rotationRecorder);
         sensorManager.unregisterListener(magnetRecorder);
+    }
+
+    private void initializeTextViews() {
+        xAxisAccelerometer = (TextView) findViewById(R.id.xAxisAccelerometer);
+        yAxisAccelerometer = (TextView) findViewById(R.id.yAxisAccelerometer);
+        zAxisAccelerometer = (TextView) findViewById(R.id.zAxisAccelerometer);
+
+        xAxisGyroscope = (TextView) findViewById(R.id.xAxisGyroscope);
+        yAxisGyroscope = (TextView) findViewById(R.id.yAxisGyroscope);
+        zAxisGyroscope = (TextView) findViewById(R.id.zAxisGyroscope);
+
+        xAxisMagnetometer = (TextView) findViewById(R.id.xAxisMagnetometer);
+        yAxisMagnetometer = (TextView) findViewById(R.id.yAxisMagnetometer);
+        zAxisMagnetometer = (TextView) findViewById(R.id.zAxisMagnetometer);
     }
 }

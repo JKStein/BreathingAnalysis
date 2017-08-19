@@ -70,7 +70,7 @@
                     android:textSize="15sp"/>
 
                 <TextView
-                    android:id="@+id/currentX"
+                    android:id="@+id/xAxisAccelerometer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -96,7 +96,7 @@
                     android:textSize="15sp"/>
 
                 <TextView
-                    android:id="@+id/currentY"
+                    android:id="@+id/yAxisAccelerometer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -122,7 +122,7 @@
                     android:textSize="15sp"/>
 
                 <TextView
-                    android:id="@+id/currentZ"
+                    android:id="@+id/zAxisAccelerometer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -181,7 +181,7 @@
                     android:textSize="15dp"/>
 
                 <TextView
-                    android:id="@+id/currentXG"
+                    android:id="@+id/xAxisGyroscope"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -207,7 +207,7 @@
                     android:textSize="15dp"/>
 
                 <TextView
-                    android:id="@+id/currentYG"
+                    android:id="@+id/yAxisGyroscope"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -233,7 +233,7 @@
                     android:textSize="15dp"/>
 
                 <TextView
-                    android:id="@+id/currentZG"
+                    android:id="@+id/zAxisGyroscope"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -291,7 +291,7 @@
                     android:textSize="15dp"/>
 
                 <TextView
-                    android:id="@+id/currentXM"
+                    android:id="@+id/xAxisMagnetometer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -317,7 +317,7 @@
                     android:textSize="15dp"/>
 
                 <TextView
-                    android:id="@+id/currentYM"
+                    android:id="@+id/yAxisMagnetometer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -343,7 +343,7 @@
                     android:textSize="15dp"/>
 
                 <TextView
-                    android:id="@+id/currentZM"
+                    android:id="@+id/zAxisMagnetometer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
