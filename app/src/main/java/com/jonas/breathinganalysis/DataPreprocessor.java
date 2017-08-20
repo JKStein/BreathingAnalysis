@@ -18,6 +18,7 @@ class DataPreprocessor {
         measuredData.printAudio();*/
 
         instantiateMeasuredDataSequence(measuredData);
+        instantiateMeasuredDataSeries(measuredData);
     }
 
     private void removeRedundancies(MeasuredData measuredData) {
@@ -171,5 +172,9 @@ class DataPreprocessor {
 
     private void instantiateMeasuredDataSequence(MeasuredData measuredData) {
         Normalizer.instantiateMeasuredDataSequence(measuredData);
+    }
+
+    private void instantiateMeasuredDataSeries(MeasuredData measuredData) {
+        Normalizer.instantiateMeasuredDataSeries(measuredData);
     }
 }

@@ -73,7 +73,7 @@ public class BreathingAnalysis extends Activity{
         tick = soundPool.load(this, R.raw.tick,1);
         tock = soundPool.load(this, R.raw.tock,1);
         handler = new Handler();
-        metronome = new Metronome(soundPool, tick, tock, handler, this, 80, 3, 5);
+        metronome = new Metronome(soundPool, tick, tock, handler, this);//80, 3, 5);
         bestFittingStartTimestamp = 0;
 
         installButton();

@@ -33,6 +33,8 @@ class MeasuredData {
     private double[] percussionSignal;
 
     private List<String[]> measuredDataSequence;
+    private  List<String> measuredDataSeries;
+    private String[] txtOverhead;
 
     private double bestFittingStartTimestamp;
     private long overallDuration;
@@ -242,5 +244,21 @@ class MeasuredData {
 
     long getOverallDuration() {
         return overallDuration;
+    }
+
+    List<String> getMeasuredDataSeries() {
+        return measuredDataSeries;
+    }
+
+    void setMeasuredDataSeries( List<String> measuredDataSeries) {
+        this.measuredDataSeries = measuredDataSeries;
+    }
+
+    String[] getTxtOverhead() {
+        return txtOverhead;
+    }
+
+    void setTxtOverhead(String[] txtOverhead) {
+        this.txtOverhead = txtOverhead;
     }
 }

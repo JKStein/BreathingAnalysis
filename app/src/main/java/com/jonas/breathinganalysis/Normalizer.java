@@ -264,6 +264,10 @@ class Normalizer {
         return false;
     }
 
+    /**
+     * For .csv file.
+     * @param measuredData
+     */
     static void instantiateMeasuredDataSequence(MeasuredData measuredData) {
         List<String[]> measuredDataSequence = new ArrayList<>();
 
@@ -303,6 +307,96 @@ class Normalizer {
         }
 
         measuredData.setMeasuredDataSequence(measuredDataSequence);
+    }
+
+
+    /**
+     * For .arff file.
+     * @param measuredData
+     */
+    static void instantiateMeasuredDataSeries(MeasuredData measuredData) {
+        String[] overhead = new String[480000];//TODO: fix magic number (use metronome class)
+        List<String> measuredDataSeries = new ArrayList<>();
+
+        String[] columnHeadings = {"x-axis acceleration", "y-axis acceleration", "z-axis acceleration",
+                "x-axis rotation", "y-axis rotation", "z-axis rotation", "x-axis magnetic", "y-axis magnetic",
+                "z-axis magnetic", "pitch", "probability", "spl", "MIDI note", "deviation", "percussion"};
+
+        int j = 0;
+        for (String columnHeading : columnHeadings) {
+            for (int i = 0; i < 32000; i++) {
+                //System.out.println("a: " + i);
+                overhead[i + j*32000] = "@attribute " + "'" + columnHeading + " " + i + "'" + " numeric\n";
+            }
+            j++;
+        }
+
+        for (int i = 0; i < 32000; i++) {
+            //System.out.println("b: " + i);
+            measuredDataSeries.add(Double.toString(measuredData.getAccelerationXValues()[i]) + ",");
+        }
+        for (int i = 0; i < 32000; i++) {
+            //System.out.println("c: " + i);
+            measuredDataSeries.add(Double.toString(measuredData.getAccelerationYValues()[i]) + ",");
+        }
+        for (int i = 0; i < 32000; i++) {
+            //System.out.println("d: " + i);
+            measuredDataSeries.add(Double.toString(measuredData.getAccelerationZValues()[i]) + ",");
+        }
+        for (int i = 0; i < 32000; i++) {
+            //System.out.println("e: " + i);
+            measuredDataSeries.add(Double.toString(measuredData.getRotationXValues()[i]) + ",");
+        }
+        for (int i = 0; i < 32000; i++) {
+            //System.out.println("f: " + i);
+            measuredDataSeries.add(Double.toString(measuredData.getRotationYValues()[i]) + ",");
+        }
+        for (int i = 0; i < 32000; i++) {
+            //System.out.println("g: " + i);
+            measuredDataSeries.add(Double.toString(measuredData.getRotationZValues()[i]) + ",");
+        }
+        for (int i = 0; i < 32000; i++) {
+            //System.out.println("h: " + i);
+            measuredDataSeries.add(Double.toString(measuredData.getMagnetXValues()[i]) + ",");
+        }
+        for (int i = 0; i < 32000; i++) {
+            //System.out.println("i: " + i);
+            measuredDataSeries.add(Double.toString(measuredData.getMagnetYValues()[i]) + ",");
+        }
+        for (int i = 0; i < 32000; i++) {
+            //System.out.println("j: " + i);
+            measuredDataSeries.add(Double.toString(measuredData.getMagnetZValues()[i]) + ",");
+        }
+        for (int i = 0; i < 32000; i++) {
+            //System.out.println("k: " + i);
+            measuredDataSeries.add(Double.toString(measuredData.getAudioPitches()[i]) + ",");
+        }
+        for (int i = 0; i < 32000; i++) {
+            //System.out.println("l: " + i);
+            measuredDataSeries.add(Double.toString(measuredData.getAudioProbabilities()[i]) + ",");
+        }
+        for (int i = 0; i < 32000; i++) {
+            //System.out.println("m: " + i);
+            measuredDataSeries.add(Double.toString(measuredData.getAudioSpls()[i]) + ",");
+        }
+        for (int i = 0; i < 32000; i++) {
+            //System.out.println("n: " + i);
+            measuredDataSeries.add(Double.toString(measuredData.getAudioMidiNoteNumber()[i]) + ",");
+        }
+        for (int i = 0; i < 32000; i++) {
+            //System.out.println("o: " + i);
+            measuredDataSeries.add(Double.toString(measuredData.getAudioNoteDeviation()[i]) + ",");
+        }
+        for (int i = 0; i < 32000; i++) {
+            //System.out.println("p: " + i);
+            measuredDataSeries.add(Double.toString(measuredData.getPercussionSignal()[i]) + ",");
+        }
+        System.out.println("q");
+
+        measuredData.setTxtOverhead(overhead);
+
+
+        measuredData.setMeasuredDataSeries(measuredDataSeries);
     }
 
     static int getMidiNote(double frequency, int tuningPitch) {
