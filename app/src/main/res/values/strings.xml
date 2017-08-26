@@ -2,9 +2,16 @@
     <string name="app_name">BreathingAnalysis</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
-    <string name="accelerometer">Accelerometer:</string>
     <string name="xAxis">x-axis</string>
     <string name="yAxis">y-axis</string>
     <string name="zAxis">z-axis</string>
     <string name="defaultFloat">0.0</string>
+    <string name="sensor">Sensor:</string>
+    <string name="frequency">Frequency in Herz</string>
+    <string name="probability">Probability of frequency correctness:</string>
+    <string name="volume">Volume in dB:</string>
+    <string name="percussion">Percussion Event:</string>
+    <string name="note">Percussion Event:</string>
+    <string name="noteOffset">Note offset:</string>
+    <string name="midiNote">MIDI note number:</string>
 </resources>

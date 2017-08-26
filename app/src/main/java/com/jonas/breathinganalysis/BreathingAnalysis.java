@@ -1,79 +1,64 @@
 package com.jonas.breathinganalysis;
 
 import android.app.Activity;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
-import android.media.SoundPool;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import be.tarsos.dsp.AudioDispatcher;
+import be.tarsos.dsp.SilenceDetector;
+import be.tarsos.dsp.io.android.AudioDispatcherFactory;
+import be.tarsos.dsp.onsets.PercussionOnsetDetector;
+import be.tarsos.dsp.pitch.PitchProcessor;
+
 import static android.content.ContentValues.TAG;
 
-public class BreathingAnalysis extends Activity{
+public class BreathingAnalysis extends Activity implements OnMetronomeDoneListener, OnVolumeDetectedListener{
 
-    ArrayList<Sound> soundEventValues;
-    ArrayList<Long> percussionEventValues;
-
-    SensorRecorder accelerationRecorder;
-    SensorRecorder rotationRecorder;
-    SensorRecorder magnetRecorder;
-
+    private static final int SENSOR_IDS[] = {Sensor.TYPE_ACCELEROMETER, Sensor.TYPE_GYROSCOPE, Sensor.TYPE_MAGNETIC_FIELD};
+    private static final String SENSOR_NAMES[] = {"Accelerometer", "Gyroscope", "Magnetometer"};
+    static final String SENSOR_ENTRIES[][] =
+            {{"Accelerometer x-Axis", "Accelerometer y-Axis", "Accelerometer z-Axis"},
+             {"Gyroscope x-Axis", "Gyroscope y-Axis", "Gyroscope z-Axis"},
+             {"Magnetometer x-Axis", "Magnetometer y-Axis", "Magnetometer z-Axis"}};
+    private SensorRecorder[] sensorRecorders;
+    private Sensor[] sensors;
     private SensorManager sensorManager;
-    private Sensor accelerometer, gyroscope, magnetometer;
 
     private Button measurementController;
 
-    /**
-     * The {@link android.widget.TextView TextViews} illustrating the sensor values of all sensors.
-     */
-    private TextView xAxisAccelerometer, yAxisAccelerometer, zAxisAccelerometer;
-    private TextView xAxisGyroscope, yAxisGyroscope, zAxisGyroscope;
-    private TextView xAxisMagnetometer, yAxisMagnetometer, zAxisMagnetometer;
+    //Audio Recording:
+    private static final int SAMPLERATE = 22050;
+    private static final int BUFFER = 1024;
+    private static final int OVERLAP = 0;
+    private static final double SENSITIVITY = 65;
+    private static final double THRESHOLD = PercussionOnsetDetector.DEFAULT_THRESHOLD * 1.5;
 
-    SoundPool soundPool;
-    int tick, tock;
-    Handler handler;
+    SilenceDetector silenceDetector;
+    PitchRecorder pitchRecorder;
+    VolumeRecorder volumeRecorder;
+    PercussionRecorder percussionRecorder;
+
+
     Metronome metronome;
     long bestFittingStartTimestamp;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        soundEventValues = new ArrayList<>();
-        percussionEventValues = new ArrayList<>();
+        initializeSensorRecorders();
 
-        initializeTextViews();
-
-        accelerationRecorder = new SensorRecorder(xAxisAccelerometer, yAxisAccelerometer, zAxisAccelerometer);
-        rotationRecorder = new SensorRecorder(xAxisGyroscope, yAxisGyroscope, zAxisGyroscope);
-        magnetRecorder = new SensorRecorder(xAxisMagnetometer, yAxisMagnetometer, zAxisMagnetometer);
-
-
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-
-
-
-        initializeAndRegisterAccelerometer();
-        initializeAndRegisterGyroscope();
-        initializeAndRegisterMagnetometer();
-
-        new AudioHandler(this);
-
-        soundPool = new SoundPool.Builder().build();
-        tick = soundPool.load(this, R.raw.tick,1);
-        tock = soundPool.load(this, R.raw.tock,1);
-        handler = new Handler();
-        metronome = new Metronome(soundPool, tick, tock, handler, this);//80, 3, 5);
         bestFittingStartTimestamp = 0;
 
         installButton();
@@ -84,14 +69,14 @@ public class BreathingAnalysis extends Activity{
         measurementController.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if(measurementController.getText().equals("Start")) {
+                    clearRecordings();
                     startRecording();
-                    handler.post(metronome);
+                    metronome.begin();
                     measurementController.setText(R.string.stop);
                 }
                 else {
-                    stopRecording();
                     metronome.reset();
-                    handler.removeCallbacks(metronome);
+                    metronome.interrupt();
                     measurementController.setText(R.string.start);
                 }
 
@@ -100,55 +85,87 @@ public class BreathingAnalysis extends Activity{
     }
 
 
-    void setStuffForDataHandler(long bestFittingStartTimestamp, long overallDuration) {
-        (new DataHandler(new MeasuredData(accelerationRecorder.getSensorData(), rotationRecorder.getSensorData(),  magnetRecorder.getSensorData(), soundEventValues, percussionEventValues, bestFittingStartTimestamp, overallDuration))).start();
-        measurementController.performClick();
-    }
+    private void initializeSensorRecorders() {
+        sensorRecorders = new SensorRecorder[SENSOR_IDS.length];
 
+        for(int i = 0; i < sensorRecorders.length; i++) {
+            sensorRecorders[i] = SensorRecorder.newInstance(SENSOR_NAMES[i]);
+        }
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
 
-    private void initializeAndRegisterAccelerometer() {
-        if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            sensorManager.registerListener(accelerationRecorder, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+        for(int i = 0; i < sensorRecorders.length; i++) {
+            fragmentTransaction.add(R.id.sensor_fragment, sensorRecorders[i], SENSOR_NAMES[i]);
         }
-        else {
-            Log.d(TAG, "No Accelerometer available!");
-        }
-    }
 
-    private void initializeAndRegisterGyroscope() {
-        if (sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null) {
-            gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-            sensorManager.registerListener(rotationRecorder, gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
-        }
-        else {
-            Log.d(TAG, "No Gyroscope available!");
-        }
-    }
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
-    private void initializeAndRegisterMagnetometer() {
-        if (sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null) {
-            magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-            sensorManager.registerListener(magnetRecorder, magnetometer, SensorManager.SENSOR_DELAY_FASTEST);
+        sensors = new Sensor[sensorRecorders.length];
+
+        for(int i = 0; i < sensorRecorders.length; i++) {
+            if (sensorManager.getDefaultSensor(SENSOR_IDS[i]) != null) {
+                sensors[i] = sensorManager.getDefaultSensor(SENSOR_IDS[i]);
+                sensorManager.registerListener(sensorRecorders[i], sensors[i], SensorManager.SENSOR_DELAY_FASTEST);
+            }
+            else {
+                Log.d(TAG, "No " + SENSOR_NAMES[i] + " available!");
+            }
         }
-        else {
-            Log.d(TAG, "No Magnetometer available!");
-        }
+
+        pitchRecorder = new PitchRecorder();
+        fragmentTransaction.add(R.id.pitch_fragment, pitchRecorder, "Pitch-Recorder");
+
+        silenceDetector = new SilenceDetector(THRESHOLD,false);
+        volumeRecorder = new VolumeRecorder();
+        fragmentTransaction.add(R.id.volume_fragment, volumeRecorder, "Volume-Recorder");
+
+        percussionRecorder = new PercussionRecorder();
+        fragmentTransaction.add(R.id.percussion_fragment, percussionRecorder, "Percussion-Recorder");
+
+        metronome = Metronome.newInstance();
+        fragmentTransaction.add(metronome, "Metronome");
+
+        fragmentTransaction.commit();
+
+        AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(SAMPLERATE,BUFFER,OVERLAP);
+
+        //Pitch and its probability
+        dispatcher.addAudioProcessor(new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, SAMPLERATE, BUFFER, pitchRecorder));
+
+        //SPL
+        dispatcher.addAudioProcessor(silenceDetector);
+        dispatcher.addAudioProcessor(volumeRecorder);
+
+        //Percussion event
+        dispatcher.addAudioProcessor(new PercussionOnsetDetector(SAMPLERATE, BUFFER, percussionRecorder, SENSITIVITY,THRESHOLD));
+
+        new Thread(dispatcher,"Audio Dispatcher").start();
     }
 
     private void startRecording() {
-        accelerationRecorder.startRecording();
-        rotationRecorder.startRecording();
-        magnetRecorder.startRecording();
+        for(int i = 0; i < SENSOR_IDS.length; i++) {
+            sensorRecorders[i].startRecording();
+        }
+        pitchRecorder.startRecording();
+        volumeRecorder.startRecording();
+        percussionRecorder.startRecording();
     }
 
     private void stopRecording() {
-        accelerationRecorder.stopRecording();
-        rotationRecorder.stopRecording();
-        magnetRecorder.stopRecording();
-        accelerationRecorder.clearSensorData();
-        rotationRecorder.clearSensorData();
-        magnetRecorder.clearSensorData();
+        for(int i = 0; i < SENSOR_IDS.length; i++) {
+            sensorRecorders[i].stopRecording();
+        }
+        pitchRecorder.stopRecording();
+        volumeRecorder.stopRecording();
+        percussionRecorder.stopRecording();
+    }
+
+    private void clearRecordings() {
+        for(int i = 0; i < SENSOR_IDS.length; i++) {
+            sensorRecorders[i].clearSensorData();
+        }
+        pitchRecorder.clearSensorData();
+        volumeRecorder.clearSensorData();
+        percussionRecorder.clearSensorData();
     }
 
     @Override
@@ -159,30 +176,44 @@ public class BreathingAnalysis extends Activity{
     @Override
     protected void onResume() {
         super.onResume();
-        sensorManager.registerListener(accelerationRecorder, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
-        sensorManager.registerListener(rotationRecorder, gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
-        sensorManager.registerListener(magnetRecorder, magnetometer, SensorManager.SENSOR_DELAY_FASTEST);
+        for(int i = 0; i < SENSOR_IDS.length; i++) {
+            sensorManager.registerListener(sensorRecorders[i], sensors[i], SensorManager.SENSOR_DELAY_FASTEST);
+        }
+        //TODO um die audio recorder kümmern
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        sensorManager.unregisterListener(accelerationRecorder);
-        sensorManager.unregisterListener(rotationRecorder);
-        sensorManager.unregisterListener(magnetRecorder);
+        for(int i = 0; i < SENSOR_IDS.length; i++) {
+            sensorManager.unregisterListener(sensorRecorders[i]);
+        }
+        //TODO um die audio recorder kümmern und um das Metronom
     }
 
-    private void initializeTextViews() {
-        xAxisAccelerometer = (TextView) findViewById(R.id.xAxisAccelerometer);
-        yAxisAccelerometer = (TextView) findViewById(R.id.yAxisAccelerometer);
-        zAxisAccelerometer = (TextView) findViewById(R.id.zAxisAccelerometer);
+    @Override
+    public void onMetronomeDone(long bestFittingStartTimestamp, long overallDuration) {
 
-        xAxisGyroscope = (TextView) findViewById(R.id.xAxisGyroscope);
-        yAxisGyroscope = (TextView) findViewById(R.id.yAxisGyroscope);
-        zAxisGyroscope = (TextView) findViewById(R.id.zAxisGyroscope);
+        stopRecording();
 
-        xAxisMagnetometer = (TextView) findViewById(R.id.xAxisMagnetometer);
-        yAxisMagnetometer = (TextView) findViewById(R.id.yAxisMagnetometer);
-        zAxisMagnetometer = (TextView) findViewById(R.id.zAxisMagnetometer);
+        ArrayList<MeasurementSeries> allRecordedSensorData = new ArrayList<>();
+        for(int i = 0; i < SENSOR_IDS.length; i++) {
+            allRecordedSensorData.add(new MeasurementSeries(sensorRecorders[i].getSensorData(), SENSOR_ENTRIES[i]));
+        }
+
+        allRecordedSensorData.add(new MeasurementSeries(pitchRecorder.getSensorData(), PitchRecorder.ENTRY_NAMES));
+        allRecordedSensorData.add(new MeasurementSeries(volumeRecorder.getSensorData(), VolumeRecorder.ENTRY_NAMES));
+        allRecordedSensorData.add(new MeasurementSeries(percussionRecorder.getSensorData(), PercussionRecorder.ENTRY_NAMES));
+
+        (new DataHandler(new MeasuredData(allRecordedSensorData, bestFittingStartTimestamp, overallDuration))).start();
+
+        //clearRecordings();
+
+        measurementController.performClick();
+    }
+
+    @Override
+    public double getSPL() {
+        return silenceDetector.currentSPL();
     }
 }

@@ -1,6 +1,9 @@
 package com.jonas.breathinganalysis;
 
+import android.app.Fragment;
+import android.content.Context;
 import android.media.SoundPool;
+import android.os.Bundle;
 import android.os.Handler;
 
 import static android.os.SystemClock.uptimeMillis;
@@ -9,7 +12,7 @@ import static android.os.SystemClock.uptimeMillis;
  * @author Jonas Stein
  */
 
-class Metronome implements Runnable {
+public class Metronome extends Fragment implements Runnable {
     private SoundPool soundPool;
     private int tick, tock;
     private Handler handler;
@@ -18,7 +21,6 @@ class Metronome implements Runnable {
     private static final int BUFFER = 12;
     private long[] beatTimestamps;
     private int beatIndex;
-    private BreathingAnalysis breathingAnalysis;
     private static final int ONE_MINUTE_IN_MILLISECONDS = 60000;
     private static final int DEFAULT_BPM = 60;
     private static final int DEFAULT_BEATS_PER_BAR = 4;
@@ -29,58 +31,53 @@ class Metronome implements Runnable {
     private int amountOfBars;
     private int totalAmountOfBeats;
 
+    private Context context;
 
-
-    /**
-     * Standard constructor, constructs a metronome with common time and 60 beats per minute.
-     * @param soundPool
-     * @param tick
-     * @param tock
-     * @param handler
-     * @param breathingAnalysis
-     */
-    Metronome(SoundPool soundPool, int tick, int tock, Handler handler, BreathingAnalysis breathingAnalysis) {
-        this.bpm = DEFAULT_BPM;
-        this.beatsPerBar = DEFAULT_BEATS_PER_BAR;
-        this.amountOfBars = DEFAULT_AMOUNT_OF_BARS;
-        this.durationOfOneBeat = ONE_MINUTE_IN_MILLISECONDS /bpm;
-
-        this.soundPool = soundPool;
-        this.tick = tick;
-        this.tock = tock;
-        this.handler = handler;
-        this.beatIndex = 0;
-        this.totalAmountOfBeats = beatsPerBar*amountOfBars;
-        this.beatTimestamps = new long[totalAmountOfBeats];
-        this.breathingAnalysis = breathingAnalysis;
+    @SuppressWarnings("unused")
+    static Metronome newInstance(int bpm, int beatsPerBar, int amountOfBars) {
+        Metronome metronome = new Metronome();
+        Bundle bundle = new Bundle();
+        bundle.putInt("bpm", bpm);
+        bundle.putInt("beatsPerBar", beatsPerBar);
+        bundle.putInt("amountOfBars", amountOfBars);
+        metronome.setArguments(bundle);
+        return metronome;
     }
 
-    /**
-     * Supports simple, compound and complex time signatures.
-     * @param soundPool
-     * @param tick
-     * @param tock
-     * @param handler
-     * @param breathingAnalysis
-     * @param bpm
-     * @param beatsPerBar
-     * @param amountOfBars
-     */
-    Metronome(SoundPool soundPool, int tick, int tock, Handler handler, BreathingAnalysis breathingAnalysis,
-              int bpm, int beatsPerBar, int amountOfBars) {
-        this.bpm = bpm;
-        this.beatsPerBar = beatsPerBar;
-        this.amountOfBars = amountOfBars;
-        this.soundPool = soundPool;
-        this.tick = tick;
-        this.tock = tock;
-        this.handler = handler;
+    static Metronome newInstance() {
+        return new Metronome();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        this.context = context;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstance) {
+        super.onCreate(savedInstance);
+        soundPool = new SoundPool.Builder().build();
+        tick = soundPool.load(context, R.raw.tick,1);
+        tock = soundPool.load(context, R.raw.tock,1);
+        handler = new Handler();
+
+        if(getArguments() != null) {
+            this.bpm = getArguments().getInt("bpm", DEFAULT_BPM);
+            this.beatsPerBar = getArguments().getInt("beatsPerBar", DEFAULT_BEATS_PER_BAR);
+            this.amountOfBars = getArguments().getInt("amountOfBars", DEFAULT_AMOUNT_OF_BARS);
+        }
+        else {
+            this.bpm = DEFAULT_BPM;
+            this.beatsPerBar = DEFAULT_BEATS_PER_BAR;
+            this.amountOfBars = DEFAULT_AMOUNT_OF_BARS;
+        }
+
         this.beatIndex = 0;
         this.totalAmountOfBeats = beatsPerBar*amountOfBars;
         this.beatTimestamps = new long[totalAmountOfBeats];
-        this.breathingAnalysis = breathingAnalysis;
 
-        this.durationOfOneBeat = ONE_MINUTE_IN_MILLISECONDS / bpm;
+        this.durationOfOneBeat = ONE_MINUTE_IN_MILLISECONDS /bpm;
     }
 
     @Override
@@ -104,14 +101,18 @@ class Metronome implements Runnable {
         }
         else {
             handler.removeCallbacks(this);
-            breathingAnalysis.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    breathingAnalysis.setStuffForDataHandler(newGetBestFittingStartTimestamp(beatTimestamps, durationOfOneBeat), totalAmountOfBeats * durationOfOneBeat);
-                }
-            });
+            ((OnMetronomeDoneListener) context).
+                    onMetronomeDone(newGetBestFittingStartTimestamp(beatTimestamps, durationOfOneBeat), totalAmountOfBeats * durationOfOneBeat);
         }
         beatIndex++;
+    }
+
+    void begin() {
+        handler.post(this);
+    }
+
+    void interrupt() {
+        handler.removeCallbacks(this);
     }
 
     private static void printStatisticalAnalysis(long[] beatTimestamps, long durationOfOneBeat) {
