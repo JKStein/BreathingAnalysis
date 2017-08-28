@@ -18,7 +18,7 @@ public class PitchRecorder extends Recorder implements PitchDetectionHandler{
     /**
      * The names of the collected data.
      */
-    static final String[] ENTRY_NAMES = {"Pitch", "Probability", "MIDI Note", "Pitch Deviation"};
+    static final String[] ENTRY_NAMES = {"Pitch", "Probability"};//, "MIDI Note", "Pitch Deviation"};
     /**
      * The name of this Sensor.
      */
@@ -50,15 +50,18 @@ public class PitchRecorder extends Recorder implements PitchDetectionHandler{
 
     @Override
     public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent audioEvent) {
-        //TODO: check out audioEvent.getSampleRate() and audioEvent.getTimestamp()
 
         final float pitch = pitchDetectionResult.getPitch();
         final float probability = pitchDetectionResult.getProbability();
-        final int midiNote = Normalizer.getMidiNote(pitch, this.midiTable);
-        final float deviation = Normalizer.getPitchDeviation(pitch, this.midiTable);
+        //final int midiNote = Normalizer.getMidiNote(pitch, this.midiTable);
+        //final float deviation = Normalizer.getPitchDeviation(pitch, this.midiTable);
 
-        final float[] sensorValues = {pitch, probability, midiNote, deviation};
+        //final float[] sensorValues = {pitch, probability, midiNote, deviation};
 
+        final float[] sensorValues = {pitch, probability};
+
+        //audioEvent.getTimeStamp() would return the amount of seconds passed
+        //since the start of the recording.
         update(uptimeMillis(), sensorValues, true);
     }
 }

@@ -30,9 +30,6 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
             {{"Accelerometer x-Axis", "Accelerometer y-Axis", "Accelerometer z-Axis"},
              {"Gyroscope x-Axis", "Gyroscope y-Axis", "Gyroscope z-Axis"},
              {"Magnetometer x-Axis", "Magnetometer y-Axis", "Magnetometer z-Axis"}};
-    private SensorRecorder[] sensorRecorders;
-    private Sensor[] sensors;
-    private SensorManager sensorManager;
 
     private Button measurementController;
 
@@ -43,14 +40,11 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
     private static final double SENSITIVITY = 65;
     private static final double THRESHOLD = PercussionOnsetDetector.DEFAULT_THRESHOLD * 1.5;
 
-    SilenceDetector silenceDetector;
-    PitchRecorder pitchRecorder;
-    VolumeRecorder volumeRecorder;
-    PercussionRecorder percussionRecorder;
+    private SilenceDetector silenceDetector;
 
-    ArrayList<Recorder> recorders;
+    private ArrayList<Recorder> recorders;
 
-    Metronome metronome;
+    private Metronome metronome;
 
 
     @Override
@@ -61,8 +55,10 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         recorders = new ArrayList<>();
 
         initializeSensorRecorders();
+
+        metronome = Metronome.newInstance();
+
         initializeFragments();
-        startAudioDispatcher();
 
         installButton();
 
@@ -95,15 +91,15 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
 
 
     private void initializeSensorRecorders() {
-        sensorRecorders = new SensorRecorder[SENSOR_IDS.length];
+        SensorRecorder[] sensorRecorders = new SensorRecorder[SENSOR_IDS.length];
 
         for(int i = 0; i < sensorRecorders.length; i++) {
             sensorRecorders[i] = SensorRecorder.newInstance(SENSOR_NAMES[i], SENSOR_ENTRIES[i]);
         }
 
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
-        sensors = new Sensor[sensorRecorders.length];
+        Sensor[] sensors = new Sensor[sensorRecorders.length];
 
         for(int i = 0; i < sensorRecorders.length; i++) {
             if (sensorManager.getDefaultSensor(SENSOR_IDS[i]) != null) {
@@ -115,49 +111,41 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
             }
         }
 
-        pitchRecorder = new PitchRecorder();
+        PitchRecorder pitchRecorder = new PitchRecorder();
         silenceDetector = new SilenceDetector(THRESHOLD,false);
-        volumeRecorder = new VolumeRecorder();
-        percussionRecorder = new PercussionRecorder();
-        metronome = Metronome.newInstance();
+        VolumeRecorder volumeRecorder = new VolumeRecorder();
+        PercussionRecorder percussionRecorder = new PercussionRecorder();
 
 
-        Collections.addAll(recorders, this.sensorRecorders);
+
+        Collections.addAll(recorders, sensorRecorders);
         recorders.add(pitchRecorder);
         recorders.add(volumeRecorder);
         recorders.add(percussionRecorder);
+
+        AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(SAMPLERATE, BUFFER, OVERLAP);
+
+        //Pitch and its probability
+        dispatcher.addAudioProcessor(new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, SAMPLERATE, BUFFER, pitchRecorder));
+        //SPL
+        dispatcher.addAudioProcessor(silenceDetector);
+        dispatcher.addAudioProcessor(volumeRecorder);
+        //Percussion event
+        dispatcher.addAudioProcessor(new PercussionOnsetDetector(SAMPLERATE, BUFFER, percussionRecorder, SENSITIVITY,THRESHOLD));
+
+        new Thread(dispatcher, "Audio Dispatcher").start();
     }
 
     private void initializeFragments() {
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
 
-
-        for(int i = 0; i < sensorRecorders.length; i++) {
-            fragmentTransaction.add(R.id.generalized_sensor_fragment, sensorRecorders[i], SENSOR_NAMES[i]);
+        for (Recorder recorder : recorders) {
+            fragmentTransaction.add(R.id.generalized_sensor_fragment, recorder, recorder.getSensorName());
         }
-        fragmentTransaction.add(R.id.generalized_sensor_fragment, pitchRecorder, "Pitch-Recorder");
-        fragmentTransaction.add(R.id.generalized_sensor_fragment, volumeRecorder, "Volume-Recorder");
-        fragmentTransaction.add(R.id.generalized_sensor_fragment, percussionRecorder, "Percussion-Recorder");
         fragmentTransaction.add(metronome, "Metronome");
 
         fragmentTransaction.commit();
     }
-
-    private void startAudioDispatcher() {
-        AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(SAMPLERATE,BUFFER,OVERLAP);
-        //Pitch and its probability
-        dispatcher.addAudioProcessor(new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, SAMPLERATE, BUFFER, pitchRecorder));
-
-        //SPL
-        dispatcher.addAudioProcessor(silenceDetector);
-        dispatcher.addAudioProcessor(volumeRecorder);
-
-        //Percussion event
-        dispatcher.addAudioProcessor(new PercussionOnsetDetector(SAMPLERATE, BUFFER, percussionRecorder, SENSITIVITY,THRESHOLD));
-
-        new Thread(dispatcher,"Audio Dispatcher").start();
-    }
-
 
 
     @Override
@@ -165,23 +153,6 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        for(int i = 0; i < SENSOR_IDS.length; i++) {
-            sensorManager.registerListener(sensorRecorders[i], sensors[i], SensorManager.SENSOR_DELAY_FASTEST);
-        }
-        //TODO care for audio recorders and metronome
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        for(int i = 0; i < SENSOR_IDS.length; i++) {
-            sensorManager.unregisterListener(sensorRecorders[i]);
-        }
-        //TODO care for audio recorders and metronome
-    }
 
     @Override
     public void onMetronomeDone(long bestFittingStartTimestamp, long overallDuration) {
@@ -189,13 +160,10 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         Recorder.stopRecording();
 
         ArrayList<MeasurementSeries> allRecordedSensorData = new ArrayList<>();
-        for(int i = 0; i < SENSOR_IDS.length; i++) {
-            allRecordedSensorData.add(new MeasurementSeries(sensorRecorders[i].getSensorData(), SENSOR_ENTRIES[i]));
-        }
 
-        allRecordedSensorData.add(new MeasurementSeries(pitchRecorder.getSensorData(), PitchRecorder.ENTRY_NAMES));
-        allRecordedSensorData.add(new MeasurementSeries(volumeRecorder.getSensorData(), VolumeRecorder.ENTRY_NAMES));
-        allRecordedSensorData.add(new MeasurementSeries(percussionRecorder.getSensorData(), PercussionRecorder.ENTRY_NAMES));
+        for (Recorder recorder : recorders) {
+            allRecordedSensorData.add(new MeasurementSeries(recorder.getSensorData(), recorder.getEntryNames()));
+        }
 
         (new DataHandler(new MeasuredData(allRecordedSensorData, bestFittingStartTimestamp, overallDuration))).start();
 

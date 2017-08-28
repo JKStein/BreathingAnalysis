@@ -1,10 +1,13 @@
 package com.jonas.breathinganalysis;
 
+import android.util.Log;
+
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.content.ContentValues.TAG;
 import static java.lang.Math.abs;
 import static java.lang.Math.pow;
 
@@ -59,10 +62,10 @@ class Normalizer {
                 if (i > 0 && list.get(i - 1).getTimestamp() >= list.get(i).getTimestamp()) {
                     list.remove(i);
                     i--;
-                    //without the i-- we would miss every list entry right after a redundant one
+                    //without the i-- we would miss every list entry right after a redundant one.
+                    Log.d(TAG, "A sensor data redundancy has been eliminated! (Position in the List: " + i + ")");
                 }
             }
-            System.out.println("list.size(): " + list.size());
         }
     }
 

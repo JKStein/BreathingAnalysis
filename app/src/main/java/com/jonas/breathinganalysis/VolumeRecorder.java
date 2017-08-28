@@ -29,6 +29,8 @@ public class VolumeRecorder extends Recorder implements AudioProcessor {
     public boolean process(AudioEvent audioEvent) {
         final float[] sensorValues = {(float) ((OnVolumeDetectedListener) super.getActivity()).getSPL()};
 
+        //audioEvent.getTimeStamp() would return the amount of seconds passed
+        //since the start of the recording.
         update(uptimeMillis(), sensorValues, true);
 
         return true;

@@ -1,45 +1,54 @@
 package com.jonas.breathinganalysis;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 class DataPreprocessor {
 
     DataPreprocessor(MeasuredData measuredData) {
-        removeRedundancies(measuredData);
-        normalizeLengthNew(measuredData);
-        measuredData.setBiggestEndTimestamp(getBiggestEndTimestamp(measuredData));
-        measuredData.setSmallestStartTimestamp(getSmallestStartTimestamp(measuredData));
+        ArrayList<MeasurementSeries> seriesOfMeasurements = measuredData.getAllMeasuredData();
+        removeRedundancies(seriesOfMeasurements);
+        normalizeTimestamps(seriesOfMeasurements, getBiggestStartTimestampNew(seriesOfMeasurements, measuredData.getBestFittingStartTimestamp()));
+        measuredData.setBiggestEndTimestamp(getBiggestEndTimestamp(seriesOfMeasurements));
+        measuredData.setSmallestStartTimestamp(getSmallestStartTimestamp(seriesOfMeasurements));
         Normalizer.instantiateMeasuredDataSequenceNew(measuredData);
     }
 
-    private void removeRedundancies(MeasuredData measuredData) {
-        for (MeasurementSeries measurementSeries : measuredData.getAllMeasuredData()) {
-            System.out.println(Arrays.toString(measurementSeries.getValues()));
+    /**
+     * Deletes all sensor data entries of one SensorDate with redundant timestamps.
+     * This usually has no effect at all, because the sample rate is at maximum 2ms.
+     * @param seriesOfMeasurements An ArrayList containing each MeasurementSeries.
+     */
+    private void removeRedundancies(ArrayList<MeasurementSeries> seriesOfMeasurements) {
+        for (MeasurementSeries measurementSeries : seriesOfMeasurements) {
             Normalizer.removeSensorDataRedundancies(measurementSeries.getSensorData());
         }
     }
 
-
-    private void normalizeLengthNew(MeasuredData measuredData) {
-        long startTimestamp = getBiggestStartTimestampNew(measuredData);
-
-        for (MeasurementSeries measurementSeries : measuredData.getAllMeasuredData()) {
+    /**
+     * Synchronizes the timestamps of each measurement to the beats of the metronome.
+     * The first beat will happen at 0ms, the last one at measuredData.getOverallDuration().
+     * @param seriesOfMeasurements An ArrayList containing each MeasurementSeries.
+     * @param startTimestamp The calculated start timestamp of the metronome producing the least
+     *                       time shift errors for the metronome.
+     */
+    private void normalizeTimestamps(ArrayList<MeasurementSeries> seriesOfMeasurements, long startTimestamp) {
+        for (MeasurementSeries measurementSeries : seriesOfMeasurements) {
             for (SensorDate sensorDate : measurementSeries.getSensorData()) {
                 sensorDate.setTimestamp(sensorDate.getTimestamp() - startTimestamp);
             }
         }
     }
 
-    private long getBiggestStartTimestampNew(MeasuredData measuredData) {
-        //TODO catch bad data
-        /*if(measuredData.isIncomplete()) {
-            return 0D;
-        }*/
-
+    /**
+     * Calculates the timestamp of the earliest measurement.
+     * @param seriesOfMeasurements Each Sensors measurements.
+     * @return The smallest start timestamp of all captured sensor data.
+     *          Returns Long.MAX_VALUE if empty data has been passed.
+     */
+    private long getBiggestStartTimestampNew(ArrayList<MeasurementSeries> seriesOfMeasurements, long bestFittingStartTimeStamp) {
         long biggest = Long.MIN_VALUE;
 
-        for (MeasurementSeries measurementSeries: measuredData.getAllMeasuredData()) {
+        for (MeasurementSeries measurementSeries: seriesOfMeasurements) {
             if(measurementSeries.getSensorData().size() > 0) {
                 long timestamp = measurementSeries.getSensorData().get(0).getTimestamp();
                 if(biggest < timestamp) {
@@ -48,45 +57,42 @@ class DataPreprocessor {
             }
         }
 
-        if(measuredData.getBestFittingStartTimestamp() > biggest) {
-            biggest = measuredData.getBestFittingStartTimestamp();
+        if(bestFittingStartTimeStamp > biggest) {
+            biggest = bestFittingStartTimeStamp;
         }
-
-        System.out.println("Biggest Start Timestamp: " + biggest);
         return biggest;
     }
 
-    private long getSmallestStartTimestamp(MeasuredData measuredData) {
-        //TODO catch bad data
-        /*if(measuredData.isIncomplete()) {
-            return 0D;
-        }*/
-
+    /**
+     * Calculates the timestamp of the earliest measurement.
+     * @param seriesOfMeasurements Each Sensors measurements.
+     * @return The smallest start timestamp of all captured sensor data.
+     *          Returns Long.MAX_VALUE if empty data has been passed.
+     */
+    private long getSmallestStartTimestamp(ArrayList<MeasurementSeries> seriesOfMeasurements) {
         long smallest = Long.MAX_VALUE;
 
-        for (MeasurementSeries measurementSeries: measuredData.getAllMeasuredData()) {
+        for (MeasurementSeries measurementSeries : seriesOfMeasurements) {
             if(measurementSeries.getSensorData().size() > 0) {
                 long timestamp = measurementSeries.getSensorData().get(0).getTimestamp();
-                System.out.println("timestamp: " + timestamp);
                 if(smallest > timestamp) {
                     smallest = timestamp;
                 }
             }
         }
-
-        System.out.println("Smallest start timestamp: " + smallest);
         return smallest;
     }
 
-    private long getBiggestEndTimestamp(MeasuredData measuredData) {
-        //TODO catch bad data
-        /*if(measuredData.isIncomplete()) {
-            return 0D;
-        }*/
-
+    /**
+     * Calculates the timestamp of the latest measurement.
+     * @param seriesOfMeasurements Each Sensors measurements.
+     * @return The biggest start timestamp of all captured sensor data.
+     *          Returns Long.MIN_VALUE if empty data has been passed.
+     */
+    private long getBiggestEndTimestamp(ArrayList<MeasurementSeries> seriesOfMeasurements) {
         long biggest = Long.MIN_VALUE;
 
-        for (MeasurementSeries measurementSeries: measuredData.getAllMeasuredData()) {
+        for (MeasurementSeries measurementSeries : seriesOfMeasurements) {
             if(measurementSeries.getSensorData().size() > 0) {
                 ArrayList<SensorDate> sensorData = measurementSeries.getSensorData();
                 long timestamp = sensorData.get(sensorData.size() - 1).getTimestamp();
@@ -95,8 +101,6 @@ class DataPreprocessor {
                 }
             }
         }
-
-        System.out.println("Biggest end timestamp: " + biggest);
         return biggest;
     }
 }

@@ -125,6 +125,10 @@ abstract class Recorder extends Fragment {
         this.entryNames = entryNames;
     }
 
+    String[] getEntryNames() {
+        return entryNames;
+    }
+
     private void update(float[] updateValues) {
         String[] update = new String[updateValues.length];
 
