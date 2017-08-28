@@ -43,8 +43,8 @@ class CustomAdapter extends BaseAdapter {
             convertView = inflater.inflate(R.layout.sensor_entry, viewGroup, false);
         }
 
-        TextView sensorEntryName = (TextView) convertView.findViewById(R.id.sensorEntryName);
-        TextView sensorEntryValue = (TextView) convertView.findViewById(R.id.sensorEntryValue);
+        TextView sensorEntryName = convertView.findViewById(R.id.sensorEntryName);
+        TextView sensorEntryValue = convertView.findViewById(R.id.sensorEntryValue);
 
         if(listEntries.size() <= 0) {
             sensorEntryName.setText(R.string.noData);
@@ -58,8 +58,12 @@ class CustomAdapter extends BaseAdapter {
         return convertView;
     }
 
-    void setNewValue(int position, String value) {
-        listEntries.get(position).setSensorValue(value);
+    void setNewValues(String[] values) {
+        if(values.length == listEntries.size()) {
+            for (int i = 0; i < values.length; i++) {
+                listEntries.get(i).setSensorValue(values[i]);
+            }
+        }
         notifyDataSetChanged();
     }
 }

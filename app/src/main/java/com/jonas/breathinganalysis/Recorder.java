@@ -1,8 +1,16 @@
 package com.jonas.breathinganalysis;
 
 import android.app.Fragment;
+import android.content.Context;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * @author Jonas Stein
@@ -17,7 +25,26 @@ abstract class Recorder extends Fragment {
     /**
      * Only if this attribute is true, the measured values will be stored.
      */
-    private boolean recording;
+    private static boolean recording;
+    static final String DEFAULT_SENSOR_NAME = "Unnamed Sensor";
+    static final String DEFAULT_ENTRY_NAME = "Unnamed Entry";
+
+    /**
+     * The name a sensor will be called if none is supplied.
+     */
+    private String sensorName;
+    /**
+     * The names of the sensor entries.
+     */
+    private String[] entryNames;
+    /**
+     * The Context of this Fragment.
+     */
+    private Context context;
+    /**
+     * The BaseAdapter between the View and the data.
+     */
+    private CustomAdapter customAdapter;
 
 
     /**
@@ -25,7 +52,35 @@ abstract class Recorder extends Fragment {
      */
     Recorder() {
         this.sensorData = new ArrayList<>();
-        this.recording = false;
+        recording = false;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        this.context = context;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        final View view = inflater.inflate(R.layout.generalized_sensor_fragment, container, false);
+
+        ArrayList<ListEntry> listEntries = new ArrayList<>();
+
+        ((TextView) view.findViewById(R.id.sensorName)).setText(this.sensorName);
+
+        //Add a default entry to the list.
+        for (String entryName : entryNames) {
+            listEntries.add(new ListEntry(entryName));
+        }
+
+        ListView list = view.findViewById(R.id.non_scrolling_list_view);
+
+        this.customAdapter = new CustomAdapter(this.context, listEntries);
+
+        list.setAdapter(customAdapter);
+
+        return view;
     }
 
 
@@ -37,19 +92,18 @@ abstract class Recorder extends Fragment {
         return this.sensorData;
     }
 
-
     /**
      * Starts the scoring of all measured sensor data.
      */
-    void startRecording() {
-        this.recording = true;
+    static void startRecording() {
+        recording = true;
     }
 
     /**
      * Stop the scoring of all measured sensor data.
      */
-    void stopRecording() {
-        this.recording = false;
+    static void stopRecording() {
+        recording = false;
     }
 
     /**
@@ -59,11 +113,44 @@ abstract class Recorder extends Fragment {
         sensorData.clear();
     }
 
-    /**
-     * Getter for recording.
-     * @return recording The boolean value representing weather the Sensor should record its values or not.
-     */
-    boolean isRecording() {
-        return recording;
+    String getSensorName() {
+        return this.sensorName;
+    }
+
+    void setSensorName(String sensorName) {
+        this.sensorName = sensorName;
+    }
+
+    void setEntryNames(String[] entryNames) {
+        this.entryNames = entryNames;
+    }
+
+    private void update(float[] updateValues) {
+        String[] update = new String[updateValues.length];
+
+        for(int i = 0; i < updateValues.length; i++) {
+            //Float.toString() could not work properly, because the separator (dot or comma) is unknown.
+            update[i] = String.format(Locale.US, "%f", updateValues[i]);
+        }
+        customAdapter.setNewValues(update);
+    }
+
+    void update(final long timestamp, final float[] updateValues, boolean runOnUi) {
+        if(runOnUi) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    update(updateValues);
+                }
+            });
+        }
+        else {
+            update(updateValues);
+        }
+
+        if(recording) {
+            //Add new values to the series of measurement if recording.
+            this.sensorData.add(new SensorDate(timestamp, updateValues));
+        }
     }
 }

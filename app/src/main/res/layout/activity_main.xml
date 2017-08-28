@@ -31,33 +31,9 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/test_layout"
+            android:id="@+id/generalized_sensor_fragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical" />
-
-        <LinearLayout
-            android:id="@+id/sensor_fragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical" />
-
-        <LinearLayout
-            android:id="@+id/pitch_fragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical" />
-
-        <LinearLayout
-            android:id="@+id/volume_fragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical" />
-
-        <LinearLayout
-            android:id="@+id/percussion_fragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical" />
     </LinearLayout>
 </ScrollView>

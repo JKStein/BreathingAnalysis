@@ -1,15 +1,23 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:weightSum="1">
 
-    <ListView
-        android:id="@+id/List1"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:divider="#000000"
-        android:dividerHeight="1dp"
-        android:fastScrollEnabled="true"/>
+    <TextView
+        android:id="@+id/sensorName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:text="@string/sensor"
+        android:textSize="18sp"
+        android:textStyle="bold"/>
+
+    <com.jonas.breathinganalysis.NonScrollListView
+        android:id="@+id/non_scrolling_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </com.jonas.breathinganalysis.NonScrollListView>
 </LinearLayout>
