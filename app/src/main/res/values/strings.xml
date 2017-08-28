@@ -14,4 +14,5 @@
     <string name="note">Percussion Event:</string>
     <string name="noteOffset">Note offset:</string>
     <string name="midiNote">MIDI note number:</string>
+    <string name="noData">No Data to display!</string>
 </resources>

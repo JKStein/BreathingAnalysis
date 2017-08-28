@@ -1,6 +1,5 @@
 package com.jonas.breathinganalysis;
 
-import android.app.Fragment;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -11,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.Locale;
 
 import static android.content.ContentValues.TAG;
@@ -20,30 +18,24 @@ import static android.content.ContentValues.TAG;
  * Measures, stores and displays all available sensor data of a particular sensor.
  * @author Jonas Stein
  */
-public class SensorRecorder extends Fragment implements SensorEventListener{
+public class SensorRecorder extends Recorder implements SensorEventListener{
 
     /**
      * The name of the Sensor.
      */
     private String sensorName;
     /**
-     * The values collected by the sensor.
-     */
-    private ArrayList<SensorDate> sensorData;
-    /**
      * The amount of nanoseconds in one millisecond.
      */
     private static final long NANOSECONDS_PER_MILLISECOND = 1000000L;
     /**
+     * The name a sensor will be called if none is supplied.
+     */
+    private static final String DEFAULT_SENSOR_NAME = "Unnamed Sensor";
+    /**
      * The {@link android.widget.TextView TextViews} illustrating the sensor values.
      */
     private TextView xAxis, yAxis, zAxis;
-    /**
-     * Only if this attribute is true, the measured values will be stored.
-     */
-    private boolean recording;
-
-
 
 
     public static SensorRecorder newInstance(String sensorName) {
@@ -68,9 +60,12 @@ public class SensorRecorder extends Fragment implements SensorEventListener{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.sensorName = getArguments().getString("sensorName", "some sensor");
-        this.recording = false;
-        this.sensorData = new ArrayList<>();
+        if(getArguments() != null) {
+            this.sensorName = getArguments().getString("sensorName", DEFAULT_SENSOR_NAME);
+        }
+        else {
+            this.sensorName = DEFAULT_SENSOR_NAME;
+        }
     }
 
     /**
@@ -93,10 +88,10 @@ public class SensorRecorder extends Fragment implements SensorEventListener{
         final long timestamp = event.timestamp / NANOSECONDS_PER_MILLISECOND;
 
         //Add new values to the series of measurement if recording.
-        if(recording) {
+        if(isRecording()) {
             //event.timestamp yields the timestamp of the SensorEvent in nanoseconds,
             // but overall measurement is based on milliseconds.
-            sensorData.add(new SensorDate(timestamp, values));
+            getSensorData().add(new SensorDate(timestamp, values));
         }
     }
 
@@ -118,34 +113,5 @@ public class SensorRecorder extends Fragment implements SensorEventListener{
             case 3:
                 Log.d(TAG, "The accuracy of the " + this.sensorName + " has changed to: high");
         }
-    }
-
-    /**
-     * Getter for the {@link java.util.ArrayList} containing the captured sensor data.
-     * @return An {@link java.util.ArrayList} containing the captured sensor data.
-     */
-    ArrayList<SensorDate> getSensorData() {
-        return this.sensorData;
-    }
-
-    /**
-     * Starts the scoring of all measured sensor data.
-     */
-    void startRecording() {
-        this.recording = true;
-    }
-
-    /**
-     * Stop the scoring of all measured sensor data.
-     */
-    void stopRecording() {
-        this.recording = false;
-    }
-
-    /**
-     * Enables storing a new series of measurement by deleting all old data.
-     */
-    void clearSensorData() {
-        sensorData.clear();
     }
 }

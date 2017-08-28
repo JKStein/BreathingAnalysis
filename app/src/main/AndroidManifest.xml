@@ -17,7 +17,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
         <activity
-            android:name="com.jonas.breathinganalysis.BreathingAnalysis"
+            android:name="com.jonas.breathinganalysis.CustomListViewAndroidExample"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/app_name"
             android:screenOrientation="portrait" >

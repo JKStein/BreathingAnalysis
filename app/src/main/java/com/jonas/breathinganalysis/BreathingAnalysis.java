@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.SilenceDetector;
@@ -47,6 +48,8 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
     VolumeRecorder volumeRecorder;
     PercussionRecorder percussionRecorder;
 
+    ArrayList<Recorder> recorders;
+
 
     Metronome metronome;
     long bestFittingStartTimestamp;
@@ -57,9 +60,22 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        /*String[] array = {"hello1", "hello2"};
+
+        ArrayAdapter adapter = new ArrayAdapter<String>(this,
+                R.layout.sensor_entry, array);
+
+        ListView listView = (ListView) findViewById(R.id.test_layout);
+        //NonScrollListView non_scroll_list = (NonScrollListView) findViewById(R.id.lv_nonscroll_list);
+        //convertView = inflater.inflate(R.layout.activity_category, null);
+        listView.setAdapter(adapter);*/
+
+        recorders = new ArrayList<>();
+
         initializeSensorRecorders();
 
         bestFittingStartTimestamp = 0;
+
 
         installButton();
     }
@@ -69,8 +85,12 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         measurementController.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if(measurementController.getText().equals("Start")) {
-                    clearRecordings();
-                    startRecording();
+
+                    for (Recorder recorder : recorders) {
+                        recorder.clearSensorData();
+                        recorder.startRecording();
+                    }
+
                     metronome.begin();
                     measurementController.setText(R.string.stop);
                 }
@@ -92,6 +112,8 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
             sensorRecorders[i] = SensorRecorder.newInstance(SENSOR_NAMES[i]);
         }
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+
+        fragmentTransaction.add(R.id.test_layout,new TestFragment(),"test fragment");
 
         for(int i = 0; i < sensorRecorders.length; i++) {
             fragmentTransaction.add(R.id.sensor_fragment, sensorRecorders[i], SENSOR_NAMES[i]);
@@ -128,6 +150,11 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
 
         AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(SAMPLERATE,BUFFER,OVERLAP);
 
+        Collections.addAll(recorders, this.sensorRecorders);
+        recorders.add(pitchRecorder);
+        recorders.add(volumeRecorder);
+        recorders.add(percussionRecorder);
+
         //Pitch and its probability
         dispatcher.addAudioProcessor(new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, SAMPLERATE, BUFFER, pitchRecorder));
 
@@ -141,32 +168,7 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         new Thread(dispatcher,"Audio Dispatcher").start();
     }
 
-    private void startRecording() {
-        for(int i = 0; i < SENSOR_IDS.length; i++) {
-            sensorRecorders[i].startRecording();
-        }
-        pitchRecorder.startRecording();
-        volumeRecorder.startRecording();
-        percussionRecorder.startRecording();
-    }
 
-    private void stopRecording() {
-        for(int i = 0; i < SENSOR_IDS.length; i++) {
-            sensorRecorders[i].stopRecording();
-        }
-        pitchRecorder.stopRecording();
-        volumeRecorder.stopRecording();
-        percussionRecorder.stopRecording();
-    }
-
-    private void clearRecordings() {
-        for(int i = 0; i < SENSOR_IDS.length; i++) {
-            sensorRecorders[i].clearSensorData();
-        }
-        pitchRecorder.clearSensorData();
-        volumeRecorder.clearSensorData();
-        percussionRecorder.clearSensorData();
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -177,24 +179,26 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
     protected void onResume() {
         super.onResume();
         for(int i = 0; i < SENSOR_IDS.length; i++) {
-            sensorManager.registerListener(sensorRecorders[i], sensors[i], SensorManager.SENSOR_DELAY_FASTEST);
+            //sensorManager.registerListener(sensorRecorders[i], sensors[i], SensorManager.SENSOR_DELAY_FASTEST);
         }
-        //TODO um die audio recorder kümmern
+        //TODO care for audio recorders
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         for(int i = 0; i < SENSOR_IDS.length; i++) {
-            sensorManager.unregisterListener(sensorRecorders[i]);
+            //sensorManager.unregisterListener(sensorRecorders[i]);
         }
         //TODO um die audio recorder kümmern und um das Metronom
     }
 
     @Override
     public void onMetronomeDone(long bestFittingStartTimestamp, long overallDuration) {
-
-        stopRecording();
+        //Stop recording measured data.
+        for (Recorder recorder : recorders) {
+            recorder.stopRecording();
+        }
 
         ArrayList<MeasurementSeries> allRecordedSensorData = new ArrayList<>();
         for(int i = 0; i < SENSOR_IDS.length; i++) {
@@ -207,7 +211,6 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
 
         (new DataHandler(new MeasuredData(allRecordedSensorData, bestFittingStartTimestamp, overallDuration))).start();
 
-        //clearRecordings();
 
         measurementController.performClick();
     }

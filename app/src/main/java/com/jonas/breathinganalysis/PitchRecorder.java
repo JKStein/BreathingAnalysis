@@ -1,14 +1,12 @@
 package com.jonas.breathinganalysis;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.Locale;
 
 import be.tarsos.dsp.AudioEvent;
@@ -21,21 +19,13 @@ import static android.os.SystemClock.uptimeMillis;
  * @author Jonas Stein
  */
 
-public class PitchRecorder extends Fragment implements PitchDetectionHandler{
+public class PitchRecorder extends Recorder implements PitchDetectionHandler{
 
     private static final int DEFAULT_TUNING = 442;
     /**
      * The names of the collected data.
      */
     static final String[] ENTRY_NAMES = {"Pitch", "Probability", "MIDI Note", "Pitch Deviation"};
-    /**
-     * The values collected by the sensor.
-     */
-    private ArrayList<SensorDate> sensorData;
-    /**
-     * Only if this attribute is true, the measured values will be stored.
-     */
-    private boolean recording;
 
     private float[] midiTable;
 
@@ -66,7 +56,6 @@ public class PitchRecorder extends Fragment implements PitchDetectionHandler{
         else {
             this.midiTable = Normalizer.midiTable(DEFAULT_TUNING);
         }
-        this.sensorData = new ArrayList<>();
     }
 
     @Override
@@ -96,36 +85,8 @@ public class PitchRecorder extends Fragment implements PitchDetectionHandler{
             }
         });
 
-        if(recording) {
-            this.sensorData.add(new SensorDate(uptimeMillis(), sensorValues));
+        if(isRecording()) {
+            getSensorData().add(new SensorDate(uptimeMillis(), sensorValues));
         }
-    }
-
-    /**
-     * Getter for the {@link java.util.ArrayList} containing the captured sensor data.
-     * @return An {@link java.util.ArrayList} containing the captured sensor data.
-     */
-    ArrayList<SensorDate> getSensorData() {
-        return this.sensorData;
-    }
-    /**
-     * Starts the scoring of all measured sensor data.
-     */
-    void startRecording() {
-        this.recording = true;
-    }
-
-    /**
-     * Stop the scoring of all measured sensor data.
-     */
-    void stopRecording() {
-        this.recording = false;
-    }
-
-    /**
-     * Enables storing a new series of measurement by deleting all old data.
-     */
-    void clearSensorData() {
-        this.sensorData.clear();
     }
 }
