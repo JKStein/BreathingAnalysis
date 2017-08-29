@@ -9,7 +9,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,7 +25,7 @@ import be.tarsos.dsp.pitch.PitchProcessor;
 
 import static android.content.ContentValues.TAG;
 
-public class BreathingAnalysis extends Activity implements OnMetronomeDoneListener, OnVolumeDetectedListener{
+public class BreathingAnalysis extends Activity implements OnMetronomeDoneListener, OnVolumeDetectedListener, AdapterView.OnItemSelectedListener, OnSavingDoneListener {
 
     private static final int SENSOR_IDS[] = {Sensor.TYPE_ACCELEROMETER, Sensor.TYPE_GYROSCOPE, Sensor.TYPE_MAGNETIC_FIELD};
     private static final String SENSOR_NAMES[] = {"Accelerometer", "Gyroscope", "Magnetometer"};
@@ -32,6 +35,7 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
              {"Magnetometer x-Axis", "Magnetometer y-Axis", "Magnetometer z-Axis"}};
 
     private Button measurementController;
+    private Spinner spinner;
 
 
     private static final int SAMPLERATE = 22050;
@@ -62,6 +66,7 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         initializeFragments();
 
         installButton();
+        installSpinner();
     }
 
     private void installButton() {
@@ -69,7 +74,7 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         measurementController.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if(measurementController.getText().equals("Start")) {
-
+                    spinner.setEnabled(false);
                     for (Recorder recorder : recorders) {
                         recorder.clearSensorData();
                     }
@@ -87,6 +92,18 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
 
             }
         });
+    }
+
+    private void installSpinner() {
+        spinner = findViewById(R.id.exercise_spinner);
+        spinner.setOnItemSelectedListener(this);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.exercise_array, android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinner.setAdapter(adapter);
     }
 
 
@@ -158,7 +175,6 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
 
     @Override
     public void onMetronomeDone(long bestFittingStartTimestamp, long overallDuration) {
-        //Stop recording measured data.
         Recorder.stopRecording();
 
         ArrayList<MeasurementSeries> allRecordedSensorData = new ArrayList<>();
@@ -167,16 +183,39 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
             allRecordedSensorData.add(new MeasurementSeries(recorder.getSensorData(), recorder.getEntryNames()));
         }
 
-
-
-        (new DataHandler(new MeasuredData(allRecordedSensorData, bestFittingStartTimestamp, overallDuration), percussionPosition)).start();
+        DataHandler dataHandler = new DataHandler(new MeasuredData(allRecordedSensorData, bestFittingStartTimestamp, overallDuration), percussionPosition);
+        dataHandler.setOnSavingDoneListener(this);
+        dataHandler.start();
 
 
         measurementController.performClick();
+        measurementController.setEnabled(false);
     }
 
     @Override
     public double getSPL() {
         return silenceDetector.currentSPL();
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view,
+                               int pos, long id) {
+        System.out.println("Position selected: " + pos);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+
+    }
+
+    @Override
+    public void savingDone() {
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                measurementController.setEnabled(true);
+                spinner.setEnabled(true);
+            }
+        });
     }
 }

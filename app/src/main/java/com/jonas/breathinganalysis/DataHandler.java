@@ -5,6 +5,7 @@ class DataHandler implements Runnable {
     private MeasuredData measuredData;
     private Thread t;
     private int percussionPosition;
+    private OnSavingDoneListener onSavingDoneListener;
 
     DataHandler(final MeasuredData measuredData, final int percussionPosition) {
         this.measuredData = measuredData;
@@ -12,10 +13,15 @@ class DataHandler implements Runnable {
         System.out.println("Creating");
     }
 
+    void setOnSavingDoneListener(OnSavingDoneListener onSavingDoneListener) {
+        this.onSavingDoneListener = onSavingDoneListener;
+    }
+
     public void run() {
         System.out.println("Running");
         new DataPreprocessor(measuredData, percussionPosition);
         new DataLogger(measuredData.getMeasuredDataSequence());
+        onSavingDoneListener.savingDone();
         System.out.println("Thread exiting.");
     }
 
