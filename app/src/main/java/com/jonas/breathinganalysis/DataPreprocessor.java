@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 class DataPreprocessor {
 
-    DataPreprocessor(MeasuredData measuredData) {
+    DataPreprocessor(MeasuredData measuredData, int percussionPosition) {
         ArrayList<MeasurementSeries> seriesOfMeasurements = measuredData.getAllMeasuredData();
         removeRedundancies(seriesOfMeasurements);
-        normalizeTimestamps(seriesOfMeasurements, getBiggestStartTimestampNew(seriesOfMeasurements, measuredData.getBestFittingStartTimestamp()));
+        normalizeTimestamps(seriesOfMeasurements, getBiggestStartTimestampNew(seriesOfMeasurements, measuredData.getBestFittingStartTimestamp(),percussionPosition));
         measuredData.setBiggestEndTimestamp(getBiggestEndTimestamp(seriesOfMeasurements));
         measuredData.setSmallestStartTimestamp(getSmallestStartTimestamp(seriesOfMeasurements));
         Normalizer.instantiateMeasuredDataSequenceNew(measuredData);
@@ -40,16 +40,16 @@ class DataPreprocessor {
     }
 
     /**
-     * Calculates the timestamp of the earliest measurement.
+     * Calculates the timestamp of the earliest measurement excluding the percussion sensor.
      * @param seriesOfMeasurements Each Sensors measurements.
-     * @return The smallest start timestamp of all captured sensor data.
+     * @return The smallest start timestamp of all captured sensor data except the one of the percussion sensor.
      *          Returns Long.MAX_VALUE if empty data has been passed.
      */
-    private long getBiggestStartTimestampNew(ArrayList<MeasurementSeries> seriesOfMeasurements, long bestFittingStartTimeStamp) {
+    private long getBiggestStartTimestampNew(ArrayList<MeasurementSeries> seriesOfMeasurements, long bestFittingStartTimeStamp, int percussionPosition) {
         long biggest = Long.MIN_VALUE;
 
-        for (MeasurementSeries measurementSeries: seriesOfMeasurements) {
-            if(measurementSeries.getSensorData().size() > 0) {
+        for (MeasurementSeries measurementSeries : seriesOfMeasurements) {
+            if((seriesOfMeasurements.indexOf(measurementSeries) != percussionPosition) && (measurementSeries.getSensorData().size() > 0)) {
                 long timestamp = measurementSeries.getSensorData().get(0).getTimestamp();
                 if(biggest < timestamp) {
                     biggest = timestamp;

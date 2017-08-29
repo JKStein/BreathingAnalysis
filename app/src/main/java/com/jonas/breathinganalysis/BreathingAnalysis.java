@@ -43,6 +43,7 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
     private SilenceDetector silenceDetector;
 
     private ArrayList<Recorder> recorders;
+    private int percussionPosition;
 
     private Metronome metronome;
 
@@ -122,6 +123,8 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         recorders.add(volumeRecorder);
         recorders.add(percussionRecorder);
 
+        percussionPosition = recorders.indexOf(percussionRecorder);
+
         AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(SAMPLERATE, BUFFER, OVERLAP);
 
         //Pitch and its probability
@@ -164,7 +167,9 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
             allRecordedSensorData.add(new MeasurementSeries(recorder.getSensorData(), recorder.getEntryNames()));
         }
 
-        (new DataHandler(new MeasuredData(allRecordedSensorData, bestFittingStartTimestamp, overallDuration))).start();
+
+
+        (new DataHandler(new MeasuredData(allRecordedSensorData, bestFittingStartTimestamp, overallDuration), percussionPosition)).start();
 
 
         measurementController.performClick();
