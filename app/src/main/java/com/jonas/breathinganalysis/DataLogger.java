@@ -14,13 +14,22 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Tries to save the supplied list to a comma separated value file on the external storage of the android device.
+ * To be more precise: in the 'Documents' directory.
+ */
 class DataLogger {
 
-    DataLogger(MeasuredData measuredData) {
+    /**
+     * Checks if the external storage is writable. If so, the data will be written there.
+     * @param list The data to be saved in a .csv file.
+     */
+    DataLogger(List<String[]> list) {
         if(externalStorageIsWritable()) {
             try {
-                log(measuredData.getMeasuredDataSequence());
-            } catch (IOException e) {
+                log(list);
+            }
+            catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -29,14 +38,21 @@ class DataLogger {
         }
     }
 
+    /**
+     * Checks if the external storage is writable.
+     * @return true if it is; false if its not.
+     */
     private static boolean externalStorageIsWritable() {
         return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
     }
 
+    /**
+     * Saves the supplied list to a comma separated value file.
+     * @param list The data to be saved in a .csv file.
+     * @throws IOException Gets thrown if the file cannot be created for any reason.
+     */
     private static void log(List<String[]> list) throws IOException {
         //checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        //System.out.println("isExternalStorageWritable(): " + externalStorageIsWritable());
 
         File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
         File file = new File(path, getCurrentDateTime() + "-measuredData.csv");
@@ -44,8 +60,9 @@ class DataLogger {
         CSVWriter writer;
 
         System.out.println("file.exists(): " + file.exists());
-        // File exist
+
         if(file.exists() && !file.isDirectory()){
+            //TODO try to implement a solution for this; the file should still be saved!
             return;
         }
         else {
@@ -58,6 +75,10 @@ class DataLogger {
         writer.close();
     }
 
+    /**
+     * Generates the current date time in the format "yyyy-MM-dd-HH-mm-ss"
+     * @return The current date time in the format "yyyy-MM-dd-HH-mm-ss"
+     */
     private static String getCurrentDateTime() {
         @SuppressLint("SimpleDateFormat") DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
         return dateFormat.format(new Date());

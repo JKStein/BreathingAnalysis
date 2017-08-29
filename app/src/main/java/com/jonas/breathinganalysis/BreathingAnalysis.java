@@ -61,7 +61,6 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         initializeFragments();
 
         installButton();
-
     }
 
     private void installButton() {

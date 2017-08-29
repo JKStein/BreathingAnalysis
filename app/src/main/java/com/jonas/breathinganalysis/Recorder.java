@@ -26,7 +26,14 @@ abstract class Recorder extends Fragment {
      * Only if this attribute is true, the measured values will be stored.
      */
     private static boolean recording;
+
+    /**
+     * This default sensor name is used for the ListView in case none is provided.
+     */
     static final String DEFAULT_SENSOR_NAME = "Unnamed Sensor";
+    /**
+     * This default sensor entry name is used for the ListView in case none is provided.
+     */
     static final String DEFAULT_ENTRY_NAME = "Unnamed Entry";
 
     /**

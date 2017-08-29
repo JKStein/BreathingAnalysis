@@ -13,7 +13,7 @@ class DataHandler implements Runnable {
     public void run() {
         System.out.println("Running");
         new DataPreprocessor(measuredData);
-        new DataLogger(measuredData);
+        new DataLogger(measuredData.getMeasuredDataSequence());
         System.out.println("Thread exiting.");
     }
 
