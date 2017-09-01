@@ -18,32 +18,15 @@ public class PitchRecorder extends Recorder implements PitchDetectionHandler{
     /**
      * The names of the collected data.
      */
-    static final String[] ENTRY_NAMES = {"Pitch", "Probability"};//, "MIDI Note", "Pitch Deviation"};
+    static final String[] ENTRY_NAMES = {"Pitch", "Probability"};
     /**
      * The name of this Sensor.
      */
     static final String SENSOR_NAME = "Pitch";
 
-    private float[] midiTable;
-
-    @SuppressWarnings("unused")
-    public static PitchRecorder newInstance(int tuning) {
-        PitchRecorder pitchRecorder = new PitchRecorder();
-        Bundle bundle = new Bundle();
-        bundle.putInt("tuning", tuning);
-        pitchRecorder.setArguments(bundle);
-        return pitchRecorder;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(getArguments() != null) {
-            this.midiTable = Normalizer.midiTable(getArguments().getInt("tuning", DEFAULT_TUNING));
-        }
-        else {
-            this.midiTable = Normalizer.midiTable(DEFAULT_TUNING);
-        }
         setSensorName(SENSOR_NAME);
         setEntryNames(ENTRY_NAMES);
     }
@@ -53,10 +36,6 @@ public class PitchRecorder extends Recorder implements PitchDetectionHandler{
 
         final float pitch = pitchDetectionResult.getPitch();
         final float probability = pitchDetectionResult.getProbability();
-        //final int midiNote = Normalizer.getMidiNote(pitch, this.midiTable);
-        //final float deviation = Normalizer.getPitchDeviation(pitch, this.midiTable);
-
-        //final float[] sensorValues = {pitch, probability, midiNote, deviation};
 
         final float[] sensorValues = {pitch, probability};
 

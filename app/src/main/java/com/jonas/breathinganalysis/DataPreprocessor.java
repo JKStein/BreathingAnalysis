@@ -23,6 +23,9 @@ class DataPreprocessor {
     /**
      * Deletes all sensor data entries of one SensorDate with redundant timestamps.
      * This usually has no effect at all, because the sample rate is at maximum 2ms.
+     * In the case of more than one sensor update happening during a millisecond,
+     * this method deletes all 'redundant' (jet different)
+     * data entries but the first of each millisecond
      * @param seriesOfMeasurements An ArrayList containing each MeasurementSeries.
      */
     private void removeRedundancies(ArrayList<MeasurementSeries> seriesOfMeasurements) {
