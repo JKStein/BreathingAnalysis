@@ -15,6 +15,7 @@
     <string name="noteOffset">Note offset:</string>
     <string name="midiNote">MIDI note number:</string>
     <string name="noData">No Data to display!</string>
+    <string name="enterName">Enter your name</string>
     <string name="selectExercise">Select an exercise</string>
     <string-array name="exercise_array">
         <item>1</item>

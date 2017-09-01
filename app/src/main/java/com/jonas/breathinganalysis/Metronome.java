@@ -6,6 +6,8 @@ import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
 
+import java.util.ArrayList;
+
 import static android.os.SystemClock.uptimeMillis;
 
 /**
@@ -32,6 +34,8 @@ public class Metronome extends Fragment implements Runnable {
     private int totalAmountOfBeats;
 
     private Context context;
+
+    private ArrayList<SensorDate> sensorData;
 
     @SuppressWarnings("unused")
     static Metronome newInstance(int bpm, int beatsPerBar, int amountOfBars) {
@@ -78,6 +82,8 @@ public class Metronome extends Fragment implements Runnable {
         this.beatTimestamps = new long[totalAmountOfBeats];
 
         this.durationOfOneBeat = ONE_MINUTE_IN_MILLISECONDS /bpm;
+
+        sensorData = new ArrayList<>();
     }
 
     @Override
@@ -96,7 +102,10 @@ public class Metronome extends Fragment implements Runnable {
             handler.postDelayed(this, PRE_BUFFER);
         }
         else if(beatIndex == totalAmountOfBeats + 1) {
-            printStatisticalAnalysis(beatTimestamps, durationOfOneBeat);
+            for (long timestamp : beatTimestamps) {
+                this.sensorData.add(new SensorDate(timestamp, new float[]{1}));
+            }
+            //printStatisticalAnalysis(beatTimestamps, durationOfOneBeat);
             handler.postDelayed(this, durationOfOneBeat + POST_BUFFER);
         }
         else {
@@ -199,5 +208,21 @@ public class Metronome extends Fragment implements Runnable {
                 "to be the most suitable offset!");
 
         return result;
+    }
+
+    ArrayList<SensorDate> getSensorData() {
+        return this.sensorData;
+    }
+
+    long getDurationOfOneBeat() {
+        return durationOfOneBeat;
+    }
+
+    int getBeatsPerBar() {
+        return beatsPerBar;
+    }
+
+    int getBpm() {
+        return bpm;
     }
 }

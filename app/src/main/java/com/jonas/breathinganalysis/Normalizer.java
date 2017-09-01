@@ -1,13 +1,10 @@
 package com.jonas.breathinganalysis;
 
-import android.util.Log;
-
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.content.ContentValues.TAG;
 import static java.lang.Math.abs;
 import static java.lang.Math.pow;
 
@@ -25,7 +22,7 @@ class Normalizer {
 
     /**
      * Calculates the average of lost information by deleting a redundant entry
-     * @param list the sensor data to process
+     * @param //list the sensor data to process
      * @return the average of lost information by deleting a redundant entry
      */
     @SuppressWarnings("unused")
@@ -55,7 +52,7 @@ class Normalizer {
      * data entries but the first of each millisecond
      * @param list the sensor data to process
      */
-    static void removeSensorDataRedundancies(ArrayList<SensorDate> list) {
+    /*static void removeSensorDataRedundancies(ArrayList<SensorDate> list) {
         if(list != null) {
 
             for (int i = 0; i < list.size(); i++) {
@@ -67,7 +64,7 @@ class Normalizer {
                 }
             }
         }
-    }
+    }*/
 
 
 

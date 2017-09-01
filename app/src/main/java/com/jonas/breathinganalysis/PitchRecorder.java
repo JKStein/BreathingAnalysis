@@ -27,7 +27,7 @@ public class PitchRecorder extends Recorder implements PitchDetectionHandler{
     private float[] midiTable;
 
     @SuppressWarnings("unused")
-    public PitchRecorder newInstance(int tuning) {
+    public static PitchRecorder newInstance(int tuning) {
         PitchRecorder pitchRecorder = new PitchRecorder();
         Bundle bundle = new Bundle();
         bundle.putInt("tuning", tuning);

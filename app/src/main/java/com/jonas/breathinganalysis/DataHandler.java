@@ -1,15 +1,18 @@
 package com.jonas.breathinganalysis;
 
+import java.util.ArrayList;
+import java.util.List;
+
 class DataHandler implements Runnable {
 
     private MeasuredData measuredData;
+    private ArrayList<FeatureVector> featureVectors;
     private Thread t;
-    private int percussionPosition;
     private OnSavingDoneListener onSavingDoneListener;
 
-    DataHandler(final MeasuredData measuredData, final int percussionPosition) {
+    DataHandler(final MeasuredData measuredData, final ArrayList<FeatureVector> featureVectors) {
         this.measuredData = measuredData;
-        this.percussionPosition = percussionPosition;
+        this.featureVectors = featureVectors;
         System.out.println("Creating");
     }
 
@@ -19,8 +22,9 @@ class DataHandler implements Runnable {
 
     public void run() {
         System.out.println("Running");
-        new DataPreprocessor(measuredData, percussionPosition);
-        new DataLogger(measuredData.getMeasuredDataSequence());
+        DataPreprocessor dataPreprocessor = new DataPreprocessor(measuredData);
+        List<String> list2 = dataPreprocessor.getFeatures(featureVectors);
+        new DataLogger(measuredData.getMeasuredDataSequence(), list2);
         onSavingDoneListener.savingDone();
         System.out.println("Thread exiting.");
     }

@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 
 import java.util.ArrayList;
@@ -33,9 +34,15 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
             {{"Accelerometer x-Axis", "Accelerometer y-Axis", "Accelerometer z-Axis"},
              {"Gyroscope x-Axis", "Gyroscope y-Axis", "Gyroscope z-Axis"},
              {"Magnetometer x-Axis", "Magnetometer y-Axis", "Magnetometer z-Axis"}};
+    static final String[] EXERCISE_IDS = {"long-tone-piano", "long-tone-forte",
+            "scale-slurred", "scale-tongued", "octave-jump-piano", "octave-jump-forte"};
 
     private Button measurementController;
     private Spinner spinner;
+    private EditText nameInput;
+
+
+    private String exerciseId;
 
 
     private static final int SAMPLERATE = 22050;
@@ -44,20 +51,27 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
     private static final double SENSITIVITY = 65;
     private static final double THRESHOLD = PercussionOnsetDetector.DEFAULT_THRESHOLD * 1.5;
 
+    private static final int DEFAULT_TUNING = 442;
+    private int tuning;
+
     private SilenceDetector silenceDetector;
 
     private ArrayList<Recorder> recorders;
-    private int percussionPosition;
 
     private Metronome metronome;
 
+    private ArrayList<FeatureVector> featureVectors;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        this.tuning = DEFAULT_TUNING;
+
         recorders = new ArrayList<>();
+
+        featureVectors = new ArrayList<>();
 
         initializeSensorRecorders();
 
@@ -67,6 +81,7 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
 
         installButton();
         installSpinner();
+        nameInput = findViewById(R.id.nameInput);
     }
 
     private void installButton() {
@@ -75,15 +90,17 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
             public void onClick(View v) {
                 if(measurementController.getText().equals("Start")) {
                     spinner.setEnabled(false);
-                    for (Recorder recorder : recorders) {
-                        recorder.clearSensorData();
-                    }
+                    nameInput.setEnabled(false);
+
                     Recorder.startRecording();
 
                     metronome.begin();
                     measurementController.setText(R.string.stop);
                 }
                 else {
+                    spinner.setEnabled(true);
+                    nameInput.setEnabled(true);
+
                     Recorder.stopRecording();
                     metronome.reset();
                     metronome.interrupt();
@@ -128,7 +145,7 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
             }
         }
 
-        PitchRecorder pitchRecorder = new PitchRecorder();
+        PitchRecorder pitchRecorder = PitchRecorder.newInstance(this.tuning);
         silenceDetector = new SilenceDetector(THRESHOLD,false);
         VolumeRecorder volumeRecorder = new VolumeRecorder();
         PercussionRecorder percussionRecorder = new PercussionRecorder();
@@ -139,8 +156,6 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         recorders.add(pitchRecorder);
         recorders.add(volumeRecorder);
         recorders.add(percussionRecorder);
-
-        percussionPosition = recorders.indexOf(percussionRecorder);
 
         AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(SAMPLERATE, BUFFER, OVERLAP);
 
@@ -182,8 +197,17 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         for (Recorder recorder : recorders) {
             allRecordedSensorData.add(new MeasurementSeries(recorder.getSensorData(), recorder.getEntryNames()));
         }
+        allRecordedSensorData.add(new MeasurementSeries(metronome.getSensorData(), new String[]{"Beat played"}));
 
-        DataHandler dataHandler = new DataHandler(new MeasuredData(allRecordedSensorData, bestFittingStartTimestamp, overallDuration), percussionPosition);
+        featureVectors.add(new FeatureVector("player-name", nameInput.getText().toString()));
+        featureVectors.add(new FeatureVector("exercise-name", exerciseId));
+        featureVectors.add(new FeatureVector("overallDuration", Long.toString(overallDuration)));
+        featureVectors.add(new FeatureVector("durationOfOneBeat", Long.toString(metronome.getDurationOfOneBeat())));
+        featureVectors.add(new FeatureVector("beatsPerBar", Integer.toString(metronome.getBeatsPerBar())));
+        featureVectors.add(new FeatureVector("bpm", Integer.toString(metronome.getBpm())));
+        featureVectors.add(new FeatureVector("tuning", Integer.toString(this.tuning)));
+
+        DataHandler dataHandler = new DataHandler(new MeasuredData(allRecordedSensorData, bestFittingStartTimestamp, overallDuration), featureVectors);
         dataHandler.setOnSavingDoneListener(this);
         dataHandler.start();
 
@@ -198,9 +222,8 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
     }
 
     @Override
-    public void onItemSelected(AdapterView<?> parent, View view,
-                               int pos, long id) {
-        System.out.println("Position selected: " + pos);
+    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+        this.exerciseId = EXERCISE_IDS[pos];
     }
 
     @Override
@@ -215,7 +238,11 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
             public void run() {
                 measurementController.setEnabled(true);
                 spinner.setEnabled(true);
+                nameInput.setEnabled(true);
             }
         });
+        for (Recorder recorder : recorders) {
+            recorder.clearSensorData();
+        }
     }
 }

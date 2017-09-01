@@ -1,18 +1,20 @@
 package com.jonas.breathinganalysis;
 
 
-import android.annotation.SuppressLint;
 import android.os.Environment;
 
 import com.opencsv.CSVWriter;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Tries to save the supplied list to a comma separated value file on the external storage of the android device.
@@ -24,10 +26,11 @@ class DataLogger {
      * Checks if the external storage is writable. If so, the data will be written there.
      * @param list The data to be saved in a .csv file.
      */
-    DataLogger(List<String[]> list) {
+    DataLogger(List<String[]> list, List<String> list2) {
         if(externalStorageIsWritable()) {
             try {
                 log(list);
+                log2(list2);
             }
             catch (IOException e) {
                 e.printStackTrace();
@@ -75,12 +78,28 @@ class DataLogger {
         writer.close();
     }
 
+    private static void log2(List<String> list) throws IOException {
+        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+        File file = new File(path, getCurrentDateTime() + "-measuredData.arff");
+        System.out.println("file.getAbsolutePath(): " + file.getAbsolutePath());
+        FileOutputStream fileOutput = new FileOutputStream(file, true);
+        OutputStreamWriter outputStreamWriter=new OutputStreamWriter(fileOutput);
+        for (String line : list) {
+            outputStreamWriter.write(line);
+        }
+        outputStreamWriter.close();
+
+        fileOutput.flush();
+        fileOutput.close();
+
+    }
+
     /**
      * Generates the current date time in the format "yyyy-MM-dd-HH-mm-ss"
      * @return The current date time in the format "yyyy-MM-dd-HH-mm-ss"
      */
     private static String getCurrentDateTime() {
-        @SuppressLint("SimpleDateFormat") DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.GERMAN);
         return dateFormat.format(new Date());
     }
 }
