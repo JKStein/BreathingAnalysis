@@ -18,7 +18,7 @@ public class Metronome extends Fragment implements Runnable {
     private SoundPool soundPool;
     private int tick, tock;
     private Handler handler;
-    private static final int PRE_BUFFER = 500;
+    private static final int PRE_BUFFER = 800;
     private static final int POST_BUFFER = 500;
     private static final int BUFFER = 12;
     private long[] beatTimestamps;
@@ -105,7 +105,6 @@ public class Metronome extends Fragment implements Runnable {
             for (long timestamp : beatTimestamps) {
                 this.sensorData.add(new SensorDate(timestamp, new float[]{1}));
             }
-            //printStatisticalAnalysis(beatTimestamps, durationOfOneBeat);
             handler.postDelayed(this, durationOfOneBeat + POST_BUFFER);
         }
         else {
@@ -122,65 +121,6 @@ public class Metronome extends Fragment implements Runnable {
 
     void interrupt() {
         handler.removeCallbacks(this);
-    }
-
-    private static void printStatisticalAnalysis(long[] beatTimestamps, long durationOfOneBeat) {
-        long accumulatedStepWidthError = 0;
-        long effectiveStepWidthError = 0;
-        long[] stepWidthErrors = new long[beatTimestamps.length-1];
-        for (int i = 1; i<beatTimestamps.length; i++) {
-            stepWidthErrors[i-1] = (beatTimestamps[i] - beatTimestamps[i-1]) - durationOfOneBeat;
-            accumulatedStepWidthError += Math.abs(stepWidthErrors[i-1]);
-            effectiveStepWidthError += stepWidthErrors[i-1];
-        }
-        for (int i = 0; i < stepWidthErrors.length; i++) {
-            System.out.println("stepWidthErrors[" + i + "]: " + stepWidthErrors[i]);
-        }
-        double averageStepWidthError = ((double) effectiveStepWidthError) / ((double) stepWidthErrors.length);
-
-        if(effectiveStepWidthError > 0) {
-            System.out.println("Overall the metronome got " + effectiveStepWidthError + "ms slower.");
-        }
-        else if(effectiveStepWidthError == 0) {
-            System.out.println("Overall the metronome kept beating exactly correct.");
-        }
-        else {
-            System.out.println("Overall the metronome got " + (-effectiveStepWidthError) + "ms faster.");
-        }
-
-        System.out.println("The overall accumulated step width error is " + accumulatedStepWidthError + "ms.");
-
-        System.out.println("The average step width error is " + averageStepWidthError + "ms.");
-
-
-
-
-        double variance = 0;
-        for (long stepWidthError : stepWidthErrors) {
-            variance += Math.pow(stepWidthError - averageStepWidthError, 2);
-        }
-        variance = variance / ((double) stepWidthErrors.length);
-        System.out.println("Variance of step width error: " + variance);
-        double standardDeviation = Math.sqrt(variance);
-        System.out.println("Standard deviation of step widths: " + standardDeviation);
-
-
-        long minValue = stepWidthErrors[0];
-        long maxValue = stepWidthErrors[0];
-        long max = stepWidthErrors[0];
-        long min = stepWidthErrors[0];
-        for (int i = 1; i < stepWidthErrors.length; i++) {
-            if (Math.abs(stepWidthErrors[i]) > max) {
-                max = Math.abs(stepWidthErrors[i]);
-                maxValue = stepWidthErrors[i];
-            }
-            if (Math.abs(stepWidthErrors[i]) < min) {
-                min = Math.abs(stepWidthErrors[i]);
-                minValue = stepWidthErrors[i];
-            }
-        }
-        System.out.println("Minimal deviation: " + minValue);
-        System.out.println("Maximal deviation: " + maxValue);
     }
 
     void reset() {

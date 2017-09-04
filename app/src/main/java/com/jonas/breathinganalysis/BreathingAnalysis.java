@@ -145,7 +145,7 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
             }
         }
 
-        PitchRecorder pitchRecorder = PitchRecorder.newInstance(this.tuning);
+        PitchRecorder pitchRecorder = new PitchRecorder();
         silenceDetector = new SilenceDetector(THRESHOLD,false);
         VolumeRecorder volumeRecorder = new VolumeRecorder();
         PercussionRecorder percussionRecorder = new PercussionRecorder();
@@ -198,6 +198,8 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
             allRecordedSensorData.add(new MeasurementSeries(recorder.getSensorData(), recorder.getEntryNames()));
         }
         allRecordedSensorData.add(new MeasurementSeries(metronome.getSensorData(), new String[]{"Beat played"}));
+
+        featureVectors.clear();
 
         featureVectors.add(new FeatureVector("player-name", nameInput.getText().toString()));
         featureVectors.add(new FeatureVector("exercise-name", exerciseId));
