@@ -203,9 +203,9 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
 
         featureVectors.add(new FeatureVector("player-name", nameInput.getText().toString()));
         featureVectors.add(new FeatureVector("exercise-name", exerciseId));
-        featureVectors.add(new FeatureVector("overallDuration", Long.toString(overallDuration)));
-        featureVectors.add(new FeatureVector("durationOfOneBeat", Long.toString(metronome.getDurationOfOneBeat())));
-        featureVectors.add(new FeatureVector("beatsPerBar", Integer.toString(metronome.getBeatsPerBar())));
+        featureVectors.add(new FeatureVector("overall-duration", Long.toString(overallDuration)));
+        featureVectors.add(new FeatureVector("duration-of-one-beat", Long.toString(metronome.getDurationOfOneBeat())));
+        featureVectors.add(new FeatureVector("beats-per-bar", Integer.toString(metronome.getBeatsPerBar())));
         featureVectors.add(new FeatureVector("bpm", Integer.toString(metronome.getBpm())));
         featureVectors.add(new FeatureVector("tuning", Integer.toString(this.tuning)));
 
