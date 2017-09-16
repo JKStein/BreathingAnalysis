@@ -28,18 +28,17 @@ import static android.content.ContentValues.TAG;
 
 public class BreathingAnalysis extends Activity implements OnMetronomeDoneListener, OnVolumeDetectedListener, AdapterView.OnItemSelectedListener, OnSavingDoneListener {
 
-    private static final int SENSOR_IDS[] = {Sensor.TYPE_ACCELEROMETER, Sensor.TYPE_GYROSCOPE, Sensor.TYPE_MAGNETIC_FIELD};
-    private static final String SENSOR_NAMES[] = {"Accelerometer", "Gyroscope", "Magnetometer"};
+    private static final int SENSOR_IDS[] = {Sensor.TYPE_ACCELEROMETER, Sensor.TYPE_GYROSCOPE};
+    private static final String SENSOR_NAMES[] = {"Accelerometer", "Gyroscope"};
     private static final String SENSOR_ENTRIES[][] =
             {{"Accelerometer x-Axis", "Accelerometer y-Axis", "Accelerometer z-Axis"},
-             {"Gyroscope x-Axis", "Gyroscope y-Axis", "Gyroscope z-Axis"},
-             {"Magnetometer x-Axis", "Magnetometer y-Axis", "Magnetometer z-Axis"}};
+             {"Gyroscope x-Axis", "Gyroscope y-Axis", "Gyroscope z-Axis"}};
     static final String[] EXERCISE_IDS = {"long-tone-piano", "long-tone-forte",
             "scale-slurred", "scale-tongued", "octave-jump-piano", "octave-jump-forte"};
 
     private Button measurementController;
     private Spinner spinner;
-    private EditText nameInput;
+    private EditText nameInput, instrumentInput;
 
 
     private String exerciseId;
@@ -62,6 +61,8 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
 
     private ArrayList<FeatureVector> featureVectors;
 
+    private Thread dispatcher;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,6 +83,7 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         installButton();
         installSpinner();
         nameInput = findViewById(R.id.nameInput);
+        instrumentInput = findViewById(R.id.instrumentInput);
     }
 
     private void installButton() {
@@ -91,6 +93,7 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
                 if(measurementController.getText().equals("Start")) {
                     spinner.setEnabled(false);
                     nameInput.setEnabled(false);
+                    instrumentInput.setEnabled(false);
 
                     Recorder.startRecording();
 
@@ -167,7 +170,8 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         //Percussion event
         dispatcher.addAudioProcessor(new PercussionOnsetDetector(SAMPLERATE, BUFFER, percussionRecorder, SENSITIVITY,THRESHOLD));
 
-        new Thread(dispatcher, "Audio Dispatcher").start();
+        this.dispatcher = new Thread(dispatcher, "Audio Dispatcher");
+        this.dispatcher.start();
     }
 
     private void initializeFragments() {
@@ -201,6 +205,7 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
 
         featureVectors.clear();
 
+        featureVectors.add(new FeatureVector("instrument", instrumentInput.getText().toString()));
         featureVectors.add(new FeatureVector("player-name", nameInput.getText().toString()));
         featureVectors.add(new FeatureVector("exercise-name", exerciseId));
         featureVectors.add(new FeatureVector("overall-duration", Long.toString(overallDuration)));
@@ -241,10 +246,13 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
                 measurementController.setEnabled(true);
                 spinner.setEnabled(true);
                 nameInput.setEnabled(true);
+                instrumentInput.setEnabled(true);
             }
         });
         for (Recorder recorder : recorders) {
             recorder.clearSensorData();
         }
     }
+
+    //TODO: implement activity lifecycle methods! (goal: stop and restart sensors when sensible)
 }
