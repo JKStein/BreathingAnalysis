@@ -1,11 +1,10 @@
 package com.jonas.breathinganalysis;
 
 import android.os.Bundle;
+import android.os.SystemClock;
 
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.AudioProcessor;
-
-import static android.os.SystemClock.uptimeMillis;
 
 public class VolumeRecorder extends Recorder implements AudioProcessor {
 
@@ -31,7 +30,7 @@ public class VolumeRecorder extends Recorder implements AudioProcessor {
 
         //audioEvent.getTimeStamp() would return the amount of seconds passed
         //since the start of the recording.
-        update(uptimeMillis(), sensorValues, true);
+        update(SystemClock.elapsedRealtime(), sensorValues, true);
 
         return true;
     }

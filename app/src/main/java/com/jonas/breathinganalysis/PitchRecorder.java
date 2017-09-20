@@ -1,20 +1,17 @@
 package com.jonas.breathinganalysis;
 
 import android.os.Bundle;
+import android.os.SystemClock;
 
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
-
-import static android.os.SystemClock.uptimeMillis;
 
 /**
  * @author Jonas Stein
  */
 
 public class PitchRecorder extends Recorder implements PitchDetectionHandler{
-
-    private static final int DEFAULT_TUNING = 442;
     /**
      * The names of the collected data.
      */
@@ -41,6 +38,6 @@ public class PitchRecorder extends Recorder implements PitchDetectionHandler{
 
         //audioEvent.getTimeStamp() would return the amount of seconds passed
         //since the start of the recording.
-        update(uptimeMillis(), sensorValues, true);
+        update(SystemClock.elapsedRealtime(), sensorValues, true);
     }
 }

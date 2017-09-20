@@ -1,10 +1,9 @@
 package com.jonas.breathinganalysis;
 
 import android.os.Bundle;
+import android.os.SystemClock;
 
 import be.tarsos.dsp.onsets.OnsetHandler;
-
-import static android.os.SystemClock.uptimeMillis;
 
 /**
  * @author Jonas Stein
@@ -37,6 +36,6 @@ public class PercussionRecorder extends Recorder implements OnsetHandler {
     @Override
     public void handleOnset(double time, double salience) {
         final float[] sensorValues = {(float) time};
-        update(uptimeMillis(), sensorValues, true);
+        update(SystemClock.elapsedRealtime(), sensorValues, true);
     }
 }

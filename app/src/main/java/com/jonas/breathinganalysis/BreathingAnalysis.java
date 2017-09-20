@@ -1,12 +1,17 @@
 package com.jonas.breathinganalysis;
 
+import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -14,11 +19,14 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 
 import be.tarsos.dsp.AudioDispatcher;
+import be.tarsos.dsp.AudioProcessor;
 import be.tarsos.dsp.SilenceDetector;
 import be.tarsos.dsp.io.android.AudioDispatcherFactory;
 import be.tarsos.dsp.onsets.PercussionOnsetDetector;
@@ -63,8 +71,19 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
 
     private Thread dispatcher;
 
+    private PitchRecorder pitchRecorder;
+    private VolumeRecorder volumeRecorder;
+    private PercussionRecorder percussionRecorder;
+
+    private ArrayList<AudioProcessor> audioProcessors;
+
+    AudioDispatcher audioDispatcher;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
+        requestPermissions();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -86,11 +105,19 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         instrumentInput = findViewById(R.id.instrumentInput);
     }
 
+    private void requestPermissions() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 42);
+    }
+
     private void installButton() {
         measurementController = findViewById(R.id.button_send);
         measurementController.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if(measurementController.getText().equals("Start")) {
+
+
+
                     spinner.setEnabled(false);
                     nameInput.setEnabled(false);
                     instrumentInput.setEnabled(false);
@@ -103,6 +130,7 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
                 else {
                     spinner.setEnabled(true);
                     nameInput.setEnabled(true);
+                    instrumentInput.setEnabled(true);
 
                     Recorder.stopRecording();
                     metronome.reset();
@@ -148,10 +176,10 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
             }
         }
 
-        PitchRecorder pitchRecorder = new PitchRecorder();
+        pitchRecorder = new PitchRecorder();
         silenceDetector = new SilenceDetector(THRESHOLD,false);
-        VolumeRecorder volumeRecorder = new VolumeRecorder();
-        PercussionRecorder percussionRecorder = new PercussionRecorder();
+        volumeRecorder = new VolumeRecorder();
+        percussionRecorder = new PercussionRecorder();
 
 
 
@@ -159,18 +187,23 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         recorders.add(pitchRecorder);
         recorders.add(volumeRecorder);
         recorders.add(percussionRecorder);
+    }
 
-        AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(SAMPLERATE, BUFFER, OVERLAP);
+    private void startAudioRecording() {
+        audioDispatcher = AudioDispatcherFactory.fromDefaultMicrophone(SAMPLERATE, BUFFER, OVERLAP);
 
-        //Pitch and its probability
-        dispatcher.addAudioProcessor(new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, SAMPLERATE, BUFFER, pitchRecorder));
-        //SPL
-        dispatcher.addAudioProcessor(silenceDetector);
-        dispatcher.addAudioProcessor(volumeRecorder);
-        //Percussion event
-        dispatcher.addAudioProcessor(new PercussionOnsetDetector(SAMPLERATE, BUFFER, percussionRecorder, SENSITIVITY,THRESHOLD));
+        this.audioProcessors = new ArrayList<>();
 
-        this.dispatcher = new Thread(dispatcher, "Audio Dispatcher");
+        audioProcessors.add(new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, SAMPLERATE, BUFFER, pitchRecorder));
+        audioProcessors.add(silenceDetector);
+        audioProcessors.add(volumeRecorder);
+        audioProcessors.add(new PercussionOnsetDetector(SAMPLERATE, BUFFER, percussionRecorder, SENSITIVITY,THRESHOLD));
+
+        for (AudioProcessor audioProcessor : audioProcessors) {
+            audioDispatcher.addAudioProcessor(audioProcessor);
+        }
+
+        this.dispatcher = new Thread(audioDispatcher);
         this.dispatcher.start();
     }
 
@@ -188,8 +221,26 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        for(String permission: permissions){
+            if(ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+                Log.e("denied", permission);
+                requestPermissions();
+            }
+            else {
+                if(ActivityCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
+                    Log.e("allowed", permission);
+                    if(permission.equals("android.permission.RECORD_AUDIO")) {
+                        startAudioRecording();
+                    }
+                }
+                else {
+                    Log.e("set to never ask again", permission);
+                    showAlertBox2();
+                }
+            }
+        }
     }
+
 
 
     @Override
@@ -214,7 +265,10 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         featureVectors.add(new FeatureVector("bpm", Integer.toString(metronome.getBpm())));
         featureVectors.add(new FeatureVector("tuning", Integer.toString(this.tuning)));
 
-        DataHandler dataHandler = new DataHandler(new MeasuredData(allRecordedSensorData, bestFittingStartTimestamp, overallDuration), featureVectors);
+        File csvFile = DataLogger.getFilePath(nameInput.getText().toString(), instrumentInput.getText().toString(), exerciseId, ".csv");
+        File arffFile = DataLogger.getFilePath(nameInput.getText().toString(), instrumentInput.getText().toString(), exerciseId, ".arff");
+
+        DataHandler dataHandler = new DataHandler(new MeasuredData(allRecordedSensorData, bestFittingStartTimestamp, overallDuration), featureVectors, csvFile, arffFile);
         dataHandler.setOnSavingDoneListener(this);
         dataHandler.start();
 
@@ -239,7 +293,7 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
     }
 
     @Override
-    public void savingDone() {
+    public void savingDone(final boolean savingFailed) {
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -247,6 +301,13 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
                 spinner.setEnabled(true);
                 nameInput.setEnabled(true);
                 instrumentInput.setEnabled(true);
+                if(savingFailed) {
+                    showAlertBox();
+                }
+                else {
+                    Toast toast = Toast.makeText(getApplicationContext(), "Saving successful!", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
             }
         });
         for (Recorder recorder : recorders) {
@@ -254,5 +315,56 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         }
     }
 
-    //TODO: implement activity lifecycle methods! (goal: stop and restart sensors when sensible)
+    private void showAlertBox2() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Permission(s) missing");
+
+        builder.setMessage("All permissions have to be granted to use this app!\nGrant all permissions via:\n'Settings -> Apps -> BreathingAnalysis -> Permissions'")
+                .setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        finish();
+                    }
+                });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void showAlertBox() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Saving error");
+
+        builder.setMessage("The recorded data did not get saved!")
+                .setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        System.out.println("Clicked ok");
+                    }
+                });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+
+    @Override
+    public void onPause() {
+        if(dispatcher != null) {
+            audioDispatcher.stop();
+            for (AudioProcessor audioProcessor : audioProcessors) {
+                audioDispatcher.removeAudioProcessor(audioProcessor);
+            }
+            audioProcessors.clear();
+        }
+        super.onPause();
+    }
+
+    @Override
+    public void onRestart() {
+        super.onRestart();
+        startAudioRecording();
+    }
 }

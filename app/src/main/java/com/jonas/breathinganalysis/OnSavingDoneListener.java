@@ -5,5 +5,5 @@ package com.jonas.breathinganalysis;
  */
 
 interface OnSavingDoneListener {
-    void savingDone();
+    void savingDone(boolean savingFailed);
 }

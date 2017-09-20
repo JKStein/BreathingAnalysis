@@ -5,10 +5,9 @@ import android.content.Context;
 import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 
 import java.util.ArrayList;
-
-import static android.os.SystemClock.uptimeMillis;
 
 /**
  * @author Jonas Stein
@@ -61,6 +60,7 @@ public class Metronome extends Fragment implements Runnable {
     @Override
     public void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
+
         soundPool = new SoundPool.Builder().build();
         tick = soundPool.load(context, R.raw.tick,1);
         tock = soundPool.load(context, R.raw.tock,1);
@@ -89,14 +89,16 @@ public class Metronome extends Fragment implements Runnable {
     @Override
     public void run() {
         if(beatIndex >= 1 && beatIndex <= totalAmountOfBeats) {
-            beatTimestamps[beatIndex-1] = uptimeMillis();
+            beatTimestamps[beatIndex-1] = SystemClock.elapsedRealtime();
             handler.postDelayed(this, durationOfOneBeat - BUFFER);
+            System.out.println("hoi1");
             if((beatIndex % beatsPerBar) == 1) {
                 soundPool.play(tick, 1, 1, 1, 0, 1);
             }
             else {
                 soundPool.play(tock, 1, 1, 1, 0, 1);
             }
+            System.out.println("hoi2");
         }
         else if(beatIndex == 0) {
             handler.postDelayed(this, PRE_BUFFER);
