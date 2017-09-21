@@ -15,7 +15,7 @@ public class PitchRecorder extends Recorder implements PitchDetectionHandler{
     /**
      * The names of the collected data.
      */
-    static final String[] ENTRY_NAMES = {"Pitch", "Probability"};
+    static final String[] ENTRY_NAMES = {"pitch", "probability"};
     /**
      * The name of this Sensor.
      */

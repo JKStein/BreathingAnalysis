@@ -107,7 +107,7 @@ class DataPreprocessor {
     private static void instantiateMeasuredDataSequenceNew(MeasuredData measuredData) {
         List<String[]> measuredDataSequence = new ArrayList<>();
 
-        String[] columnHeadings = {"Timestamp"};
+        String[] columnHeadings = {"timestamp"};
 
         for (MeasurementSeries measurementSeries : measuredData.getAllMeasuredData()) {
             columnHeadings = ArrayUtils.addAll(columnHeadings,measurementSeries.getValues());

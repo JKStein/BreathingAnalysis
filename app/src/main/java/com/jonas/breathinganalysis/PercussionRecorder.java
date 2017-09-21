@@ -18,7 +18,7 @@ public class PercussionRecorder extends Recorder implements OnsetHandler {
     /**
      * The names of the collected data.
      */
-    static final String[] ENTRY_NAMES = {"Time"};
+    static final String[] ENTRY_NAMES = {"time"};
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

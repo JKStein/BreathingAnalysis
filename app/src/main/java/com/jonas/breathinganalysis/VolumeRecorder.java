@@ -15,7 +15,7 @@ public class VolumeRecorder extends Recorder implements AudioProcessor {
     /**
      * The names of the collected data.
      */
-    static final String[] ENTRY_NAMES = {"Sound Pressure Length"};
+    static final String[] ENTRY_NAMES = {"sound-pressure-length"};
 
     @Override
     public void onCreate(Bundle savedInstance) {

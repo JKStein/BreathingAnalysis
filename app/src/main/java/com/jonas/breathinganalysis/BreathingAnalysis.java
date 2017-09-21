@@ -39,8 +39,8 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
     private static final int SENSOR_IDS[] = {Sensor.TYPE_ACCELEROMETER, Sensor.TYPE_GYROSCOPE};
     private static final String SENSOR_NAMES[] = {"Accelerometer", "Gyroscope"};
     private static final String SENSOR_ENTRIES[][] =
-            {{"Accelerometer x-Axis", "Accelerometer y-Axis", "Accelerometer z-Axis"},
-             {"Gyroscope x-Axis", "Gyroscope y-Axis", "Gyroscope z-Axis"}};
+            {{"accelerometer-x-axis", "accelerometer-y-axis", "accelerometer-z-axis"},
+             {"gyroscope-x-axis", "gyroscope-y-axis", "gyroscope-z-axis"}};
     static final String[] EXERCISE_IDS = {"long-tone-piano", "long-tone-forte",
             "scale-slurred", "scale-tongued", "octave-jump-piano", "octave-jump-forte"};
 
@@ -252,7 +252,7 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         for (Recorder recorder : recorders) {
             allRecordedSensorData.add(new MeasurementSeries(recorder.getSensorData(), recorder.getEntryNames()));
         }
-        allRecordedSensorData.add(new MeasurementSeries(metronome.getSensorData(), new String[]{"Beat played"}));
+        allRecordedSensorData.add(new MeasurementSeries(metronome.getSensorData(), new String[]{"beat-played"}));
 
         featureVectors.clear();
 
