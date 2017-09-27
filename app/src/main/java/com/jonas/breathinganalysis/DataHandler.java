@@ -4,40 +4,38 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Coordinates the processing of the measured data.
+ */
 class DataHandler implements Runnable {
-
     private MeasuredData measuredData;
-    private ArrayList<FeatureVector> featureVectors;
-    private Thread t;
+    private ArrayList<Feature> features;
     private OnSavingDoneListener onSavingDoneListener;
     private File csvFile, arffFile;
 
-    DataHandler(final MeasuredData measuredData, final ArrayList<FeatureVector> featureVectors, final File csvFile, final File arffFile) {
+    DataHandler(final MeasuredData measuredData, final ArrayList<Feature> features,
+                final File csvFile, final File arffFile,
+                final OnSavingDoneListener onSavingDoneListener) {
         this.measuredData = measuredData;
-        this.featureVectors = featureVectors;
-        System.out.println("Creating");
+        this.features = features;
         this.csvFile = csvFile;
         this.arffFile = arffFile;
-    }
-
-    void setOnSavingDoneListener(OnSavingDoneListener onSavingDoneListener) {
         this.onSavingDoneListener = onSavingDoneListener;
+        (new Thread(this)).start();
     }
 
+    /**
+     * Instructs preprocessing and storing of the the measured data and its features.
+     */
     public void run() {
-        System.out.println("Running");
-        DataPreprocessor dataPreprocessor = new DataPreprocessor(measuredData);
-        List<String> list2 = dataPreprocessor.getFeatures(featureVectors);
-        boolean text = DataLogger.writeToFiles(measuredData.getMeasuredDataSequence(), list2, csvFile, arffFile);
+        ArrayList<MeasurementSeries> seriesOfMeasurements = measuredData.getAllMeasuredData();
+        DataPreprocessor.removeRedundancies(seriesOfMeasurements);
+        DataPreprocessor.normalizeTimestamps(seriesOfMeasurements, measuredData.getBestFittingStartTimestamp());
+        long smallestStartTimestamp = DataPreprocessor.getSmallestStartTimestamp(seriesOfMeasurements);
+        long biggestEndTimestamp = DataPreprocessor.getBiggestEndTimestamp(seriesOfMeasurements);
+        List<String[]> csvList = DataPreprocessor.getMeasuredDataSequence(seriesOfMeasurements, smallestStartTimestamp, biggestEndTimestamp);
+        List<String> arffList = DataPreprocessor.getFeatures(features);
+        boolean text = DataLogger.writeToFiles(csvList, arffList, csvFile, arffFile);
         onSavingDoneListener.savingDone(text);
-        System.out.println("Thread exiting.");
-    }
-
-    void start () {
-        System.out.println("Starting");
-        if (t == null) {
-            t = new Thread (this);
-            t.start ();
-        }
     }
 }

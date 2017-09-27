@@ -6,9 +6,9 @@ import android.os.SystemClock;
 import be.tarsos.dsp.onsets.OnsetHandler;
 
 /**
+ * Detects records the timestamp of a percussion like signal.
  * @author Jonas Stein
  */
-
 public class PercussionRecorder extends Recorder implements OnsetHandler {
 
     /**
@@ -29,7 +29,7 @@ public class PercussionRecorder extends Recorder implements OnsetHandler {
 
     /**
      * Gets called when a percussion event occurs.
-     * Updates the textViews with passed time argument and stores its value if recording.
+     * Displays and (if recording) stores the timestamp of the percussion event.
      * @param time The amount of seconds passed since the start of the recording.
      * @param salience This value seems to be a constant (-1).
      */

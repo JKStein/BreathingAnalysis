@@ -9,17 +9,10 @@ import java.util.List;
 
 import static android.content.ContentValues.TAG;
 
+/**
+ * Normalizes and merges all recorded data into the appropriate file structure.
+ */
 class DataPreprocessor {
-
-    DataPreprocessor(MeasuredData measuredData) {
-        ArrayList<MeasurementSeries> seriesOfMeasurements = measuredData.getAllMeasuredData();
-        removeRedundancies(seriesOfMeasurements);
-        normalizeTimestamps(seriesOfMeasurements, measuredData.getBestFittingStartTimestamp());
-        measuredData.setBiggestEndTimestamp(getBiggestEndTimestamp(seriesOfMeasurements));
-        measuredData.setSmallestStartTimestamp(getSmallestStartTimestamp(seriesOfMeasurements));
-        instantiateMeasuredDataSequenceNew(measuredData);
-    }
-
     /**
      * Deletes all sensor data entries of one SensorDate with redundant timestamps.
      * This usually has no effect at all, because the sample rate is at maximum 2ms.
@@ -28,7 +21,7 @@ class DataPreprocessor {
      * data entries but the first of each millisecond
      * @param seriesOfMeasurements An ArrayList containing each MeasurementSeries.
      */
-    private void removeRedundancies(ArrayList<MeasurementSeries> seriesOfMeasurements) {
+    static void removeRedundancies(ArrayList<MeasurementSeries> seriesOfMeasurements) {
         for (MeasurementSeries measurementSeries : seriesOfMeasurements) {
             ArrayList<SensorDate> list = measurementSeries.getSensorData();
             if(list != null) {
@@ -51,7 +44,7 @@ class DataPreprocessor {
      * @param startTimestamp The calculated start timestamp of the metronome producing the least
      *                       time shift errors for the metronome.
      */
-    private void normalizeTimestamps(ArrayList<MeasurementSeries> seriesOfMeasurements, long startTimestamp) {
+    static void normalizeTimestamps(ArrayList<MeasurementSeries> seriesOfMeasurements, long startTimestamp) {
         for (MeasurementSeries measurementSeries : seriesOfMeasurements) {
             for (SensorDate sensorDate : measurementSeries.getSensorData()) {
                 sensorDate.setTimestamp(sensorDate.getTimestamp() - startTimestamp);
@@ -65,7 +58,7 @@ class DataPreprocessor {
      * @return The smallest start timestamp of all captured sensor data.
      *          Returns Long.MAX_VALUE if empty data has been passed.
      */
-    private long getSmallestStartTimestamp(ArrayList<MeasurementSeries> seriesOfMeasurements) {
+    static long getSmallestStartTimestamp(ArrayList<MeasurementSeries> seriesOfMeasurements) {
         long smallest = Long.MAX_VALUE;
 
         for (MeasurementSeries measurementSeries : seriesOfMeasurements) {
@@ -85,7 +78,7 @@ class DataPreprocessor {
      * @return The biggest start timestamp of all captured sensor data.
      *          Returns Long.MIN_VALUE if empty data has been passed.
      */
-    private long getBiggestEndTimestamp(ArrayList<MeasurementSeries> seriesOfMeasurements) {
+    static long getBiggestEndTimestamp(ArrayList<MeasurementSeries> seriesOfMeasurements) {
         long biggest = Long.MIN_VALUE;
 
         for (MeasurementSeries measurementSeries : seriesOfMeasurements) {
@@ -101,80 +94,64 @@ class DataPreprocessor {
     }
 
     /**
-     * For .csv file.
-     * @param measuredData
-     */
-    private static void instantiateMeasuredDataSequenceNew(MeasuredData measuredData) {
+     * Produces the content for the CSV file.
+     * @param seriesOfMeasurements An ArrayList of all recorded measurements.
+     * @param smallestStartTimestamp The timestamp of the earliest measurement by a recorder.
+     * @param biggestEndTimestamp  The timestamp of the last measurement by a recorder.
+     * @return The CSV file content.
+     * */
+    static List<String[]> getMeasuredDataSequence(ArrayList<MeasurementSeries> seriesOfMeasurements,
+                                                  long smallestStartTimestamp,
+                                                  long biggestEndTimestamp) {
         List<String[]> measuredDataSequence = new ArrayList<>();
 
         String[] columnHeadings = {"timestamp"};
 
-        for (MeasurementSeries measurementSeries : measuredData.getAllMeasuredData()) {
-            columnHeadings = ArrayUtils.addAll(columnHeadings,measurementSeries.getValues());
+        for (MeasurementSeries measurementSeries : seriesOfMeasurements) {
+            columnHeadings = ArrayUtils.addAll(columnHeadings,measurementSeries.getSensorEntryNames());
         }
 
         measuredDataSequence.add(columnHeadings);
 
-        for(long i = measuredData.getSmallestStartTimestamp(); i < measuredData.getBiggestEndTimestamp(); i++) {
+        for(long i = smallestStartTimestamp; i < biggestEndTimestamp; i++) {
 
             String[] measurementAtASpecificTimestamp = {String.valueOf(i)};
 
-            for (MeasurementSeries measurementSeries : measuredData.getAllMeasuredData()) {
+            for (MeasurementSeries measurementSeries : seriesOfMeasurements) {
                 measurementAtASpecificTimestamp = ArrayUtils.addAll(measurementAtASpecificTimestamp,measurementSeries.contains(i));
             }
 
             measuredDataSequence.add(measurementAtASpecificTimestamp);
         }
 
-        measuredData.setMeasuredDataSequence(measuredDataSequence);
+        return measuredDataSequence;
     }
 
     /**
-     * For .arff file.
-     * @param featureVectors the supplied features as an arraylist of feature vectors
-     * @return arff file content
+     * Produces the content for the ARFF file.
+     * @param features The supplied features as an ArrayList of feature vectors.
+     * @return The ARFF file content.
      */
-    List<String> getFeatures(ArrayList<FeatureVector> featureVectors) {
+    static List<String> getFeatures(ArrayList<Feature> features) {
         List<String> lines = new ArrayList<>();
 
-        lines.add("@relation breathingAnalysis");
+        lines.add("@relation breathing-analysis\n");
 
-
-        lines.add("@attribute " + featureVectors.get(0).getFeatureName() + " {'" + featureVectors.get(0).getFeatureValue() + "'}");
-
-        String exerciseIds = "";
-        for (int i = 0; i < BreathingAnalysis.EXERCISE_IDS.length; i++) {
-            if(i != 0) {
-                exerciseIds += ",'" + BreathingAnalysis.EXERCISE_IDS[i] + "'";
-            }
-            else {
-                exerciseIds = "'" + BreathingAnalysis.EXERCISE_IDS[i] + "'";
-            }
+        for (Feature feature : features) {
+            lines.add("@attribute " + feature.getFeatureName() + " " + feature.getFeatureType() + "\n");
         }
 
-        lines.add("@attribute " + featureVectors.get(1).getFeatureName() + " " +
-                "{" + exerciseIds + "}");
+        lines.add("@data\n");
 
-        for (int i = 2; i < featureVectors.size(); i++) {
-            lines.add("@attribute " + featureVectors.get(i).getFeatureName() + " numeric");
+        String values = "";
+
+        for (Feature feature : features) {
+            values += feature.getFeatureValue() + ",";
         }
 
+        values = values.substring(0, values.length() - 1);
 
-
-
-        lines.add("@data");
-
-        String values = "'" + featureVectors.get(0).getFeatureValue() + "'," +
-                "'" + featureVectors.get(1).getFeatureValue() + "'";
-        for (int i = 2; i < featureVectors.size(); i++) {
-            values += "," + featureVectors.get(i).getFeatureValue();
-        }
-
-        lines.add(values);
-
-        for (int i = 0; i < lines.size() - 1; i++) {
-            lines.set(i, lines.get(i) + "\n");
-        }
+        lines.add(values + "\n");
 
         return lines;
     }

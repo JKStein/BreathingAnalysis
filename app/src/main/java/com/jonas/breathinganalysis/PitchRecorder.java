@@ -8,9 +8,9 @@ import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 
 /**
+ * A PitchDetectionHandler recording the pitch in herz an the probability of its correctness.
  * @author Jonas Stein
  */
-
 public class PitchRecorder extends Recorder implements PitchDetectionHandler{
     /**
      * The names of the collected data.
@@ -30,7 +30,6 @@ public class PitchRecorder extends Recorder implements PitchDetectionHandler{
 
     @Override
     public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent audioEvent) {
-
         final float pitch = pitchDetectionResult.getPitch();
         final float probability = pitchDetectionResult.getProbability();
 

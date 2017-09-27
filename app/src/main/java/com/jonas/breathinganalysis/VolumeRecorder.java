@@ -6,6 +6,10 @@ import android.os.SystemClock;
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.AudioProcessor;
 
+/**
+ * An Audio Processor recording the sound pressure length detected.
+ * @author Jonas Stein
+ */
 public class VolumeRecorder extends Recorder implements AudioProcessor {
 
     /**
@@ -24,6 +28,11 @@ public class VolumeRecorder extends Recorder implements AudioProcessor {
         setEntryNames(ENTRY_NAMES);
     }
 
+    /**
+     * Retrieves the spl from the SilenceDetector, displays and (if recording) stores it.
+     * @param audioEvent A new AudioEvent pushed to the AudioProcessor.
+     * @return True.
+     */
     @Override
     public boolean process(AudioEvent audioEvent) {
         final float[] sensorValues = {(float) ((OnVolumeDetectedListener) super.getActivity()).getSPL()};
@@ -31,10 +40,13 @@ public class VolumeRecorder extends Recorder implements AudioProcessor {
         //audioEvent.getTimeStamp() would return the amount of seconds passed
         //since the start of the recording.
         update(SystemClock.elapsedRealtime(), sensorValues, true);
-
         return true;
     }
 
+    /**
+     * Gets called when the processing of the AudioEvent finished.
+     * Nothing needs to be done.
+     */
     @Override
     public void processingFinished() {
 

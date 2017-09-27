@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 import be.tarsos.dsp.AudioDispatcher;
@@ -44,44 +45,42 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
     static final String[] EXERCISE_IDS = {"long-tone-piano", "long-tone-forte",
             "scale-slurred", "scale-tongued", "octave-jump-piano", "octave-jump-forte"};
 
-    private Button measurementController;
-    private Spinner spinner;
-    private EditText nameInput, instrumentInput;
-
-
-    private String exerciseId;
-
-
     private static final int SAMPLERATE = 22050;
     private static final int BUFFER = 1024;
     private static final int OVERLAP = 0;
     private static final double SENSITIVITY = 65;
     private static final double THRESHOLD = PercussionOnsetDetector.DEFAULT_THRESHOLD * 1.5;
-
     private static final int DEFAULT_TUNING = 442;
+
+    private Button measurementController;
+    private Spinner spinner;
+    private String exerciseId;
+    private EditText nameInput, instrumentInput;
     private int tuning;
-
-    private SilenceDetector silenceDetector;
-
-    private ArrayList<Recorder> recorders;
+    private ArrayList<Feature> features;
 
     private Metronome metronome;
 
-    private ArrayList<FeatureVector> featureVectors;
+    private ArrayList<Recorder> recorders;
+    private ArrayList<AudioProcessor> audioProcessors;
 
     private Thread dispatcher;
+    AudioDispatcher audioDispatcher;
 
+    private SilenceDetector silenceDetector;
     private PitchRecorder pitchRecorder;
     private VolumeRecorder volumeRecorder;
     private PercussionRecorder percussionRecorder;
 
-    private ArrayList<AudioProcessor> audioProcessors;
-
-    AudioDispatcher audioDispatcher;
-
+    /**
+     * Called when the activity is starting.
+     * Requests required permissions, initializes the recorders and the interactive UI elements.
+     * @param savedInstanceState If the activity is being re-initialized after previously being
+     *                           shut down then this Bundle contains the data it most recently
+     *                           supplied in onSaveInstanceState(Bundle).
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
         requestPermissions();
 
         super.onCreate(savedInstanceState);
@@ -90,34 +89,38 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         this.tuning = DEFAULT_TUNING;
 
         recorders = new ArrayList<>();
-
-        featureVectors = new ArrayList<>();
+        features = new ArrayList<>();
 
         initializeSensorRecorders();
 
-        metronome = Metronome.newInstance();
+        metronome = new Metronome();
 
         initializeFragments();
-
         installButton();
         installSpinner();
+
         nameInput = findViewById(R.id.nameInput);
         instrumentInput = findViewById(R.id.instrumentInput);
     }
 
+    /**
+     * Requests the permissions to record audio and to write to external storage.
+     */
     private void requestPermissions() {
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 42);
     }
 
+    /**
+     * Instantiates the Button and sets the on-click-events.
+     * Starts the recording when start is pressed and interrupts it, when stop is pressed.
+     * Disables changes in the recording settings while recording.
+     */
     private void installButton() {
         measurementController = findViewById(R.id.button_send);
         measurementController.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if(measurementController.getText().equals("Start")) {
-
-
-
                     spinner.setEnabled(false);
                     nameInput.setEnabled(false);
                     instrumentInput.setEnabled(false);
@@ -142,19 +145,22 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         });
     }
 
+    /**
+     * Initializes the Spinner for selecting which exercise is getting recorded.
+     */
     private void installSpinner() {
         spinner = findViewById(R.id.exercise_spinner);
         spinner.setOnItemSelectedListener(this);
-        // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.exercise_array, android.R.layout.simple_spinner_item);
-        // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
     }
 
-
+    /**
+     * Initializes the motion sensor recorders as well as the audio recorders.
+     * Adds them all to the recorders ArrayList.
+     */
     private void initializeSensorRecorders() {
         SensorRecorder[] sensorRecorders = new SensorRecorder[SENSOR_IDS.length];
 
@@ -181,14 +187,15 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         volumeRecorder = new VolumeRecorder();
         percussionRecorder = new PercussionRecorder();
 
-
-
         Collections.addAll(recorders, sensorRecorders);
         recorders.add(pitchRecorder);
         recorders.add(volumeRecorder);
         recorders.add(percussionRecorder);
     }
 
+    /**
+     * Initializes the start of the audio recording.
+     */
     private void startAudioRecording() {
         audioDispatcher = AudioDispatcherFactory.fromDefaultMicrophone(SAMPLERATE, BUFFER, OVERLAP);
 
@@ -207,6 +214,9 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         this.dispatcher.start();
     }
 
+    /**
+     * Initializes all fragments.
+     */
     private void initializeFragments() {
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
 
@@ -219,6 +229,13 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
     }
 
 
+    /**
+     * Callback for the result from requesting permissions.
+     * Start recording if all permissions are granted. Request permissions again if not.
+     * @param requestCode The request code passed in requestPermissions(android.app.Activity, String[], int)
+     * @param permissions The requested permissions. Never null.
+     * @param grantResults The grant results for the corresponding permissions which is either PERMISSION_GRANTED or PERMISSION_DENIED. Never null.
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         for(String permission: permissions){
@@ -235,14 +252,19 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
                 }
                 else {
                     Log.e("set to never ask again", permission);
-                    showAlertBox2();
+                    showGrantingPermissionsRequirementAlertDialog();
                 }
             }
         }
     }
 
 
-
+    /**
+     * Initiates the data handling with primed values.
+     * @param bestFittingStartTimestamp A timestamp in milliseconds suggesting the official
+     *                                  timestamp of the first beat.
+     * @param overallDuration The destined time in milliseconds from the first to the end of
+     */
     @Override
     public void onMetronomeDone(long bestFittingStartTimestamp, long overallDuration) {
         Recorder.stopRecording();
@@ -254,44 +276,61 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         }
         allRecordedSensorData.add(new MeasurementSeries(metronome.getSensorData(), new String[]{"beat-played"}));
 
-        featureVectors.clear();
+        features.clear();
 
-        featureVectors.add(new FeatureVector("instrument", instrumentInput.getText().toString()));
-        featureVectors.add(new FeatureVector("player-name", nameInput.getText().toString()));
-        featureVectors.add(new FeatureVector("exercise-name", exerciseId));
-        featureVectors.add(new FeatureVector("overall-duration", Long.toString(overallDuration)));
-        featureVectors.add(new FeatureVector("duration-of-one-beat", Long.toString(metronome.getDurationOfOneBeat())));
-        featureVectors.add(new FeatureVector("beats-per-bar", Integer.toString(metronome.getBeatsPerBar())));
-        featureVectors.add(new FeatureVector("bpm", Integer.toString(metronome.getBpm())));
-        featureVectors.add(new FeatureVector("tuning", Integer.toString(this.tuning)));
+        features.add(new Feature("instrument", "{'" + instrumentInput.getText().toString() + "'}", "'" + instrumentInput.getText().toString() + "'"));
+        features.add(new Feature("player-name", "{'" + nameInput.getText().toString() + "'}", "'" + nameInput.getText().toString() + "'"));
+        features.add(new Feature("exercise-name", Arrays.toString(EXERCISE_IDS).replace('[', '{').replace(']', '}'), exerciseId));
+        features.add(new Feature("overall-duration", Long.toString(overallDuration)));
+        features.add(new Feature("duration-of-one-beat", Long.toString(metronome.getDurationOfOneBeat())));
+        features.add(new Feature("beats-per-bar", Integer.toString(metronome.getBeatsPerBar())));
+        features.add(new Feature("bpm", Integer.toString(metronome.getBpm())));
+        features.add(new Feature("tuning", Integer.toString(this.tuning)));
 
         File csvFile = DataLogger.getFilePath(nameInput.getText().toString(), instrumentInput.getText().toString(), exerciseId, ".csv");
         File arffFile = DataLogger.getFilePath(nameInput.getText().toString(), instrumentInput.getText().toString(), exerciseId, ".arff");
 
-        DataHandler dataHandler = new DataHandler(new MeasuredData(allRecordedSensorData, bestFittingStartTimestamp, overallDuration), featureVectors, csvFile, arffFile);
-        dataHandler.setOnSavingDoneListener(this);
-        dataHandler.start();
-
+        new DataHandler(new MeasuredData(allRecordedSensorData, bestFittingStartTimestamp), features, csvFile, arffFile, this);
 
         measurementController.performClick();
         measurementController.setEnabled(false);
     }
 
+    /**
+     * Gets called by the VolumeRecorder and passes the current spl forward to it.
+     * @return The current spl of the SilenceDetector.
+     */
     @Override
     public double getSPL() {
         return silenceDetector.currentSPL();
     }
 
+    /**
+     * Is invoked when an item in the Spinner gets selected.
+     * @param parent The AdapterView where the selection happened.
+     * @param view The view within the AdapterView that was clicked.
+     * @param pos The position of the view in the adapter.
+     * @param id The row id of the item that is selected.
+     */
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
         this.exerciseId = EXERCISE_IDS[pos];
     }
 
+    /**
+     * Is invoked when the selection disappears from this view. Nothing needs to be done.
+     * @param adapterView The AdapterView that now contains no selected item.
+     */
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
 
     }
 
+    /**
+     * Gets called when The DataHandler finished processing the data.
+     * Re-enables the interacting UI elements.
+     * @param savingFailed Is true, if the DataHandler was unsuccessful in saving the data.
+     */
     @Override
     public void savingDone(final boolean savingFailed) {
         this.runOnUiThread(new Runnable() {
@@ -302,7 +341,7 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
                 nameInput.setEnabled(true);
                 instrumentInput.setEnabled(true);
                 if(savingFailed) {
-                    showAlertBox();
+                    showSavingErrorAlertDialog();
                 }
                 else {
                     Toast toast = Toast.makeText(getApplicationContext(), "Saving successful!", Toast.LENGTH_SHORT);
@@ -315,12 +354,17 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         }
     }
 
-    private void showAlertBox2() {
+    /**
+     * Displays an Alert Dialog illustrating the requirement of granting all permissions.
+     */
+    private void showGrantingPermissionsRequirementAlertDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setTitle("Permission(s) missing");
 
-        builder.setMessage("All permissions have to be granted to use this app!\nGrant all permissions via:\n'Settings -> Apps -> BreathingAnalysis -> Permissions'")
+        builder.setMessage("All permissions have to be granted to use this app! + " +
+                "\nGrant all permissions via:" +
+                "\n'Settings -> Apps -> BreathingAnalysis -> Permissions'")
                 .setCancelable(false)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -332,7 +376,10 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         alertDialog.show();
     }
 
-    private void showAlertBox() {
+    /**
+     * Displays an Alert Dialog illustrating the fail of storing the data.
+     */
+    private void showSavingErrorAlertDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setTitle("Saving error");
@@ -349,7 +396,10 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         alertDialog.show();
     }
 
-
+    /**
+     * Gets called when another activity comes into the foreground.
+     * Stops audio
+     */
     @Override
     public void onPause() {
         if(dispatcher != null) {
@@ -362,6 +412,10 @@ public class BreathingAnalysis extends Activity implements OnMetronomeDoneListen
         super.onPause();
     }
 
+    /**
+     * Gets called when the user navigates to the activity.
+     * (Re)starts the audio recording.
+     */
     @Override
     public void onRestart() {
         super.onRestart();
