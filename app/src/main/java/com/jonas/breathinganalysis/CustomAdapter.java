@@ -9,7 +9,10 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-
+/**
+ * Connection between the list view and the content of its list.
+ * @author Jonas Stein
+ */
 class CustomAdapter extends BaseAdapter {
     private Context context;
     private ArrayList<ListEntry> listEntries;
@@ -35,9 +38,15 @@ class CustomAdapter extends BaseAdapter {
     }
 
 
+    /**
+     * Get a View that displays the data at the specified position in the data set.
+     * @param position The position of the item within the adapter's data set.
+     * @param convertView The old view to reuse, if possible.
+     * @param viewGroup The parent that this view will eventually be attached to.
+     * @return A View corresponding to the data at the specified position.
+     */
     @Override
     public View getView(int position, View convertView, ViewGroup viewGroup) {
-
         if(convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.sensor_entry, viewGroup, false);
@@ -58,6 +67,10 @@ class CustomAdapter extends BaseAdapter {
         return convertView;
     }
 
+    /**
+     * Updates the values of all list elements with the supplied string array.
+     * @param values The new values.
+     */
     void setNewValues(String[] values) {
         if(values.length == listEntries.size()) {
             for (int i = 0; i < values.length; i++) {

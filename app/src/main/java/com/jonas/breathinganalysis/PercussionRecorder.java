@@ -1,15 +1,14 @@
 package com.jonas.breathinganalysis;
 
 import android.os.Bundle;
+import android.os.SystemClock;
 
 import be.tarsos.dsp.onsets.OnsetHandler;
 
-import static android.os.SystemClock.uptimeMillis;
-
 /**
+ * Detects records the timestamp of a percussion like signal.
  * @author Jonas Stein
  */
-
 public class PercussionRecorder extends Recorder implements OnsetHandler {
 
     /**
@@ -19,7 +18,7 @@ public class PercussionRecorder extends Recorder implements OnsetHandler {
     /**
      * The names of the collected data.
      */
-    static final String[] ENTRY_NAMES = {"Time"};
+    static final String[] ENTRY_NAMES = {"time"};
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -30,13 +29,13 @@ public class PercussionRecorder extends Recorder implements OnsetHandler {
 
     /**
      * Gets called when a percussion event occurs.
-     * Updates the textViews with passed time argument and stores its value if recording.
+     * Displays and (if recording) stores the timestamp of the percussion event.
      * @param time The amount of seconds passed since the start of the recording.
      * @param salience This value seems to be a constant (-1).
      */
     @Override
     public void handleOnset(double time, double salience) {
         final float[] sensorValues = {(float) time};
-        update(uptimeMillis(), sensorValues, true);
+        update(SystemClock.elapsedRealtime(), sensorValues, true);
     }
 }

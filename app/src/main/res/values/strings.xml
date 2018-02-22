@@ -17,6 +17,7 @@
     <string name="noData">No Data to display!</string>
     <string name="enterName">Enter your name</string>
     <string name="selectExercise">Select an exercise</string>
+    <string name="enterInstrument">Enter your instrument</string>
     <string-array name="exercise_array">
         <item>1</item>
         <item>2</item>

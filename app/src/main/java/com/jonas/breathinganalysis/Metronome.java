@@ -5,38 +5,44 @@ import android.content.Context;
 import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 
 import java.util.ArrayList;
 
-import static android.os.SystemClock.uptimeMillis;
-
 /**
  * @author Jonas Stein
+ * Plays a specific amount of beats in the pattern and speed passed.
+ * If nothing gets passed, default settings get applied.
  */
-
 public class Metronome extends Fragment implements Runnable {
-    private SoundPool soundPool;
-    private int tick, tock;
-    private Handler handler;
-    private static final int PRE_BUFFER = 500;
-    private static final int POST_BUFFER = 500;
-    private static final int BUFFER = 12;
-    private long[] beatTimestamps;
-    private int beatIndex;
     private static final int ONE_MINUTE_IN_MILLISECONDS = 60000;
     private static final int DEFAULT_BPM = 60;
     private static final int DEFAULT_BEATS_PER_BAR = 4;
     private static final int DEFAULT_AMOUNT_OF_BARS = 8;
+    private static final int PRE_BUFFER = 800;
+    private static final int POST_BUFFER = 500;
+    private static final int BUFFER = 12;
+
+    private SoundPool soundPool;
+    private int tick, tock;
+    private Handler handler;
+
+    private long[] beatTimestamps;
+    private int beatIndex;
     private long durationOfOneBeat;
-    private int bpm;
-    private int beatsPerBar;
-    private int amountOfBars;
-    private int totalAmountOfBeats;
+    private int bpm, beatsPerBar, amountOfBars, totalAmountOfBeats;
 
     private Context context;
 
     private ArrayList<SensorDate> sensorData;
 
+    /**
+     * Creates a new instance of a metronome.
+     * @param bpm The beats per minute.
+     * @param beatsPerBar The amount of beats per bar.
+     * @param amountOfBars The total amount of bars.
+     * @return A new Metronome
+     */
     @SuppressWarnings("unused")
     static Metronome newInstance(int bpm, int beatsPerBar, int amountOfBars) {
         Metronome metronome = new Metronome();
@@ -48,19 +54,24 @@ public class Metronome extends Fragment implements Runnable {
         return metronome;
     }
 
-    static Metronome newInstance() {
-        return new Metronome();
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         this.context = context;
     }
 
+    /**
+     * Instantiates all variables.
+     * If an instance was created its parameters will be used for instantiation.
+     * @param savedInstanceState If the activity is being re-initialized after
+     *                           previously being shut down then this Bundle contains
+     *                           the data it most recently supplied in onSaveInstanceState(Bundle).
+     *                           Note: Otherwise it is null.
+     */
     @Override
-    public void onCreate(Bundle savedInstance) {
-        super.onCreate(savedInstance);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
         soundPool = new SoundPool.Builder().build();
         tick = soundPool.load(context, R.raw.tick,1);
         tock = soundPool.load(context, R.raw.tock,1);
@@ -78,18 +89,21 @@ public class Metronome extends Fragment implements Runnable {
         }
 
         this.beatIndex = 0;
-        this.totalAmountOfBeats = beatsPerBar*amountOfBars;
+        this.totalAmountOfBeats = beatsPerBar * amountOfBars;
         this.beatTimestamps = new long[totalAmountOfBeats];
 
-        this.durationOfOneBeat = ONE_MINUTE_IN_MILLISECONDS /bpm;
+        this.durationOfOneBeat = ONE_MINUTE_IN_MILLISECONDS / bpm;
 
         sensorData = new ArrayList<>();
     }
 
+    /**
+     * Plays the sounds and reports to the OnMetronomeDoneListener when all beats have been played.
+     */
     @Override
     public void run() {
         if(beatIndex >= 1 && beatIndex <= totalAmountOfBeats) {
-            beatTimestamps[beatIndex-1] = uptimeMillis();
+            beatTimestamps[beatIndex-1] = SystemClock.elapsedRealtime();
             handler.postDelayed(this, durationOfOneBeat - BUFFER);
             if((beatIndex % beatsPerBar) == 1) {
                 soundPool.play(tick, 1, 1, 1, 0, 1);
@@ -105,7 +119,6 @@ public class Metronome extends Fragment implements Runnable {
             for (long timestamp : beatTimestamps) {
                 this.sensorData.add(new SensorDate(timestamp, new float[]{1}));
             }
-            //printStatisticalAnalysis(beatTimestamps, durationOfOneBeat);
             handler.postDelayed(this, durationOfOneBeat + POST_BUFFER);
         }
         else {
@@ -116,98 +129,48 @@ public class Metronome extends Fragment implements Runnable {
         beatIndex++;
     }
 
+    /**
+     * Starts the metronome.
+     */
     void begin() {
         handler.post(this);
     }
 
+    /**
+     * Interrupts the metronome.
+     */
     void interrupt() {
         handler.removeCallbacks(this);
     }
 
-    private static void printStatisticalAnalysis(long[] beatTimestamps, long durationOfOneBeat) {
-        long accumulatedStepWidthError = 0;
-        long effectiveStepWidthError = 0;
-        long[] stepWidthErrors = new long[beatTimestamps.length-1];
-        for (int i = 1; i<beatTimestamps.length; i++) {
-            stepWidthErrors[i-1] = (beatTimestamps[i] - beatTimestamps[i-1]) - durationOfOneBeat;
-            accumulatedStepWidthError += Math.abs(stepWidthErrors[i-1]);
-            effectiveStepWidthError += stepWidthErrors[i-1];
-        }
-        for (int i = 0; i < stepWidthErrors.length; i++) {
-            System.out.println("stepWidthErrors[" + i + "]: " + stepWidthErrors[i]);
-        }
-        double averageStepWidthError = ((double) effectiveStepWidthError) / ((double) stepWidthErrors.length);
-
-        if(effectiveStepWidthError > 0) {
-            System.out.println("Overall the metronome got " + effectiveStepWidthError + "ms slower.");
-        }
-        else if(effectiveStepWidthError == 0) {
-            System.out.println("Overall the metronome kept beating exactly correct.");
-        }
-        else {
-            System.out.println("Overall the metronome got " + (-effectiveStepWidthError) + "ms faster.");
-        }
-
-        System.out.println("The overall accumulated step width error is " + accumulatedStepWidthError + "ms.");
-
-        System.out.println("The average step width error is " + averageStepWidthError + "ms.");
-
-
-
-
-        double variance = 0;
-        for (long stepWidthError : stepWidthErrors) {
-            variance += Math.pow(stepWidthError - averageStepWidthError, 2);
-        }
-        variance = variance / ((double) stepWidthErrors.length);
-        System.out.println("Variance of step width error: " + variance);
-        double standardDeviation = Math.sqrt(variance);
-        System.out.println("Standard deviation of step widths: " + standardDeviation);
-
-
-        long minValue = stepWidthErrors[0];
-        long maxValue = stepWidthErrors[0];
-        long max = stepWidthErrors[0];
-        long min = stepWidthErrors[0];
-        for (int i = 1; i < stepWidthErrors.length; i++) {
-            if (Math.abs(stepWidthErrors[i]) > max) {
-                max = Math.abs(stepWidthErrors[i]);
-                maxValue = stepWidthErrors[i];
-            }
-            if (Math.abs(stepWidthErrors[i]) < min) {
-                min = Math.abs(stepWidthErrors[i]);
-                minValue = stepWidthErrors[i];
-            }
-        }
-        System.out.println("Minimal deviation: " + minValue);
-        System.out.println("Maximal deviation: " + maxValue);
-    }
-
+    /**
+     * Resets all parameters to their defaults.
+     */
     void reset() {
         this.bpm = DEFAULT_BPM;
         this.beatsPerBar = DEFAULT_BEATS_PER_BAR;
         this.amountOfBars = DEFAULT_AMOUNT_OF_BARS;
-        this.durationOfOneBeat = ONE_MINUTE_IN_MILLISECONDS /bpm;
+        this.durationOfOneBeat = ONE_MINUTE_IN_MILLISECONDS / bpm;
         this.beatIndex = 0;
-        this.totalAmountOfBeats = beatsPerBar*amountOfBars;
+        this.totalAmountOfBeats = beatsPerBar * amountOfBars;
         this.beatTimestamps = new long[totalAmountOfBeats];
     }
 
-    //based on the method of least squares with a fixed slope
+    /**
+     * Computes a timestamp in milliseconds for official timestamp of the first beat
+     * based on the method of least squares with a fixed slope.
+     * @param beatTimestamps The timestamps of all beats played.
+     * @param durationOfOneBeat The duration of a beat in milliseconds.
+     * @return A suggestion for the official timestamp of the first beat.
+     */
     private static long newGetBestFittingStartTimestamp(long[] beatTimestamps, long durationOfOneBeat) {
-        System.out.println("beatTimestamps[0] = " + beatTimestamps[0]);
         long arithmeticSum = 0;
         for (long beatTimestamp : beatTimestamps) {
             arithmeticSum += beatTimestamp;
         }
         long arithmeticMiddle = arithmeticSum/beatTimestamps.length;
 
-        long result = arithmeticMiddle + durationOfOneBeat * (1 - beatTimestamps.length) / 2;
-
-        System.out.println("The method of least squares calculated " + (result-beatTimestamps[0]) + "ms " +
-                "to be the most suitable offset!");
-
-        return result;
+        return arithmeticMiddle + durationOfOneBeat * (1 - beatTimestamps.length) / 2;
     }
 
     ArrayList<SensorDate> getSensorData() {

@@ -13,9 +13,9 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 /**
+ * A Fragment framing a recording sensor. Displays the UI and stores the data.
  * @author Jonas Stein
  */
-
 abstract class Recorder extends Fragment {
 
     /**
@@ -68,6 +68,14 @@ abstract class Recorder extends Fragment {
         this.context = context;
     }
 
+    /**
+     * Creates the view of a recorder using a non scrolling list view and the CustomAdapter
+     * @param inflater The LayoutInflater object that gets used to inflate any views in the fragment.
+     * @param container If non-null, this is the parent view that the fragment's UI should be attached to.
+     *                  The fragment should not add the view itself, but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state as given here.
+     * @return Return the View for the fragment's UI, or null.
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.generalized_sensor_fragment, container, false);
@@ -136,6 +144,10 @@ abstract class Recorder extends Fragment {
         return entryNames;
     }
 
+    /**
+     * Updates values shown on the UI.
+     * @param updateValues The new values.
+     */
     private void update(float[] updateValues) {
         String[] update = new String[updateValues.length];
 
@@ -146,6 +158,13 @@ abstract class Recorder extends Fragment {
         customAdapter.setNewValues(update);
     }
 
+    /**
+     * Updates the values shown on the UI with the passed new values if needed on the UI Thread.
+     * Saves them to the sensorData array if recording.
+     * @param timestamp The timestamp of the recorded values.
+     * @param updateValues The new values.
+     * @param runOnUi True iff the visual update can not be run on the current thread.
+     */
     void update(final long timestamp, final float[] updateValues, boolean runOnUi) {
         if(runOnUi) {
             getActivity().runOnUiThread(new Runnable() {

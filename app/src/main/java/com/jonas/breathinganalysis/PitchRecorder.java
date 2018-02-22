@@ -1,24 +1,21 @@
 package com.jonas.breathinganalysis;
 
 import android.os.Bundle;
+import android.os.SystemClock;
 
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 
-import static android.os.SystemClock.uptimeMillis;
-
 /**
+ * A PitchDetectionHandler recording the pitch in herz an the probability of its correctness.
  * @author Jonas Stein
  */
-
 public class PitchRecorder extends Recorder implements PitchDetectionHandler{
-
-    private static final int DEFAULT_TUNING = 442;
     /**
      * The names of the collected data.
      */
-    static final String[] ENTRY_NAMES = {"Pitch", "Probability"};
+    static final String[] ENTRY_NAMES = {"pitch", "probability"};
     /**
      * The name of this Sensor.
      */
@@ -33,7 +30,6 @@ public class PitchRecorder extends Recorder implements PitchDetectionHandler{
 
     @Override
     public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent audioEvent) {
-
         final float pitch = pitchDetectionResult.getPitch();
         final float probability = pitchDetectionResult.getProbability();
 
@@ -41,6 +37,6 @@ public class PitchRecorder extends Recorder implements PitchDetectionHandler{
 
         //audioEvent.getTimeStamp() would return the amount of seconds passed
         //since the start of the recording.
-        update(uptimeMillis(), sensorValues, true);
+        update(SystemClock.elapsedRealtime(), sensorValues, true);
     }
 }

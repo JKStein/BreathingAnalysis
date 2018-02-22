@@ -1,11 +1,10 @@
 package com.jonas.breathinganalysis;
 
 /**
+ * The model of a list entry representing a sensor name and its current value.
  * @author Jonas Stein
  */
-
 class ListEntry {
-
     private static final String DEFAULT_SENSOR_VALUE = "0.0";
     private String sensorEntryName;
     private String sensorValue;

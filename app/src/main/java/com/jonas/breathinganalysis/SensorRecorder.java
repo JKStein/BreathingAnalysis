@@ -18,7 +18,12 @@ public class SensorRecorder extends Recorder implements SensorEventListener{
      */
     private static final long NANOSECONDS_PER_MILLISECOND = 1000000L;
 
-
+    /**
+     * Creates a new instance of a SensorRecorder with the passed arguments.
+     * @param sensorName The name of the sensor
+     * @param entryNames The names of the values of the sensor.
+     * @return A SensorRecorder with the desired name and entry names.
+     */
     public static SensorRecorder newInstance(String sensorName, String[] entryNames) {
         SensorRecorder sensorRecorder = new SensorRecorder();
         Bundle bundle = new Bundle();
